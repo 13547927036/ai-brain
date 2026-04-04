@@ -1,0 +1,25 @@
+{
+  "name": "ai-config",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "prepare": "husky"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/imoo666/ai-config.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/imoo666/ai-config/issues"
+  },
+  "homepage": "https://github.com/imoo666/ai-config#readme",
+  "devDependencies": {
+    "husky": "^9.1.7"
+  }
+}

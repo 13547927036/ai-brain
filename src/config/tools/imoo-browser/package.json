@@ -1,0 +1,11 @@
+{
+  "name": "imoo-browser",
+  "version": "1.0.0",
+  "description": "AI 命令行浏览器控制插件",
+  "private": true,
+  "workspaces": ["cli"],
+  "scripts": {
+    "cli": "node cli/bin/cli.js",
+    "cli:server": "node cli/bin/cli.js"
+  }
+}

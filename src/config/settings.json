@@ -1,0 +1,46 @@
+{
+  "mcpServers": {
+    "feishu-mcp": {
+      "url": "https://mcp.feishu.cn/mcp/mcp_UNKj04_Tlh_V03h2Lc22J1ze0uVDvxuLmda20kqGtmvXkDIiiqmUJIIycRw2Mk83j3vZd1p7C5k",
+      "headers": {}
+    }
+  },
+  "env": {
+    "ANTHROPIC_AUTH_TOKEN": "sk-8022e701f45c42fdabd872ad0467e181",
+    "ANTHROPIC_BASE_URL": "https://dashscope.aliyuncs.com/apps/anthropic",
+    "ANTHROPIC_DEFAULT_HAIKU_MODEL": "qwen3.5-plus",
+    "ANTHROPIC_DEFAULT_OPUS_MODEL": "qwen3.5-plus",
+    "ANTHROPIC_DEFAULT_SONNET_MODEL": "qwen3.5-plus",
+    "ANTHROPIC_MODEL": "qwen3.5-plus"
+  },
+  "enabledPlugins": {
+    "document-skills@anthropic-agent-skills": true,
+    "superpowers@claude-plugins-official": true,
+    "planning-with-files@planning-with-files": true,
+    "code-review@claude-plugins-official": true,
+    "code-simplifier@claude-plugins-official": true
+  },
+  "extraKnownMarketplaces": {
+    "anthropic-agent-skills": {
+      "source": {
+        "source": "git",
+        "url": "https://github.com/anthropics/skills.git"
+      }
+    },
+    "planning-with-files": {
+      "source": {
+        "source": "github",
+        "repo": "OthmanAdi/planning-with-files"
+      }
+    }
+  },
+  "skipDangerousModePermissionPrompt": true,
+  "hooks": {
+    "Stop": [{
+      "hooks": [{
+        "type": "command",
+        "command": "osascript -e 'display notification \"老板，我搞好了\" with title \"Claude Code\"'"
+      }]
+    }]
+  }
+}

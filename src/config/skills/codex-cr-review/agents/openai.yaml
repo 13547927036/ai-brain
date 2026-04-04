@@ -1,0 +1,6 @@
+interface:
+  display_name: "Codex CR Review"
+  short_description: "简化版 GitLab MR 评审 - 接收 MR 链接，输出结构化评审报告（P0/P1/P2）"
+  default_prompt: "Use $codex-cr-review to review this GitLab merge request. Read the MR metadata and diffs, then output a structured review report in Simplified Chinese with severity classification (P0/P1/P2), concrete file:line references, and clear merge recommendation. Keep it read-only - do not write to GitLab."
+policy:
+  allow_implicit_invocation: true

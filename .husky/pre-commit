@@ -1,0 +1,16 @@
+#!/bin/bash
+# =============================================================================
+# AI Config 项目 Git Pre-commit Hook
+# 所有校验逻辑由 scripts/validate-files.js 统一执行
+# =============================================================================
+
+set -e
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+
+echo "========================================"
+echo "  Pre-commit 校验"
+echo "========================================"
+echo ""
+
+node "$SCRIPT_DIR/scripts/validate-files/index.js"
