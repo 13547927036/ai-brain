@@ -1,0 +1,1036 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>项目复盘</title>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.js"></script>
+    <style>
+        /* ===== 基础样式 ===== */
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+            background: #f5f5f7;
+            min-height: 100vh;
+            padding: 16px;
+        }
+        .container { max-width: 500px; margin: 0 auto; }
+        
+        /* ===== 头部和导航 ===== */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            position: sticky;
+            top: 0;
+            background: #f5f5f7;
+            padding: 16px 0;
+            z-index: 50;
+        }
+        .tabs {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 16px;
+            position: sticky;
+            top: 60px;
+            background: #f5f5f7;
+            padding: 8px 0;
+            z-index: 50;
+        }
+        .game-selector {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            background: #fff;
+            padding: 8px 16px;
+            border-radius: 12px;
+            cursor: pointer;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+        }
+        .game-selector:hover { background: #f0f0f5; }
+        .game-title { font-size: 1.1rem; color: #1d1d1f; font-weight: 600; }
+        .game-icon { color: #86868b; }
+        .settings-btn, .back-btn { cursor: pointer; padding: 8px; color: #1d1d1f; }
+        .settings-btn:hover, .back-btn:hover { opacity: 0.6; }
+        
+        /* ===== 卡片和按钮 ===== */
+        .card {
+            background: #fff;
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 16px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+        }
+        .btn {
+            width: 100%;
+            padding: 14px;
+            border-radius: 12px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            transition: all 0.2s;
+        }
+        .btn:active { transform: scale(0.98); opacity: 0.8; }
+        .btn-primary { background: #007aff; color: #fff; }
+        .btn-success { background: #34c759; color: #fff; }
+        .btn-danger { background: #ffebeb; color: #ff3b30; }
+        .btn-outline { background: #fff; color: #007aff; border: 2px solid #007aff; }
+        
+        /* ===== 选项按钮 ===== */
+        .tags { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+        .tag-btn {
+            padding: 16px;
+            border-radius: 12px;
+            background: #f0f0f5;
+            color: #1d1d1f;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            border: 2px solid #e0e0e5;
+            text-align: center;
+            transition: all 0.2s;
+        }
+        .tag-btn:active { transform: scale(0.95); opacity: 0.8; }
+        .tag-btn.selected { background: #007aff; color: #fff; border-color: #007aff; }
+        .option-btn {
+            padding: 14px;
+            border-radius: 12px;
+            background: #f0f0f5;
+            color: #1d1d1f;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            border: none;
+            text-align: center;
+            transition: all 0.2s;
+        }
+        .option-btn:active { background: #007aff; color: #fff; transform: scale(0.98); }
+        
+        /* ===== 设置页样式 ===== */
+        .tag-manager-item {
+            background: #f8f8fa;
+            border-radius: 12px;
+            padding: 14px;
+            margin-bottom: 12px;
+        }
+        .tag-manager-name {
+            flex: 1;
+            padding: 8px 12px;
+            background: #fff;
+            border: 2px solid transparent;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+        }
+        .tag-manager-name:focus { outline: none; border-color: #007aff; }
+        .tag-manager-delete {
+            background: none;
+            color: #ff3b30;
+            border: none;
+            padding: 4px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .tag-manager-delete:hover { opacity: 0.6; }
+        
+        /* ===== 项目列表样式 ===== */
+        .game-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 14px 16px;
+            background: #f8f8fa;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .game-item:hover { background: #f0f0f5; }
+        .game-item.active { background: #007aff; color: #fff; }
+        .game-item-name { font-size: 15px; font-weight: 600; }
+        .game-item-count { font-size: 12px; opacity: 0.7; margin-top: 2px; }
+        .game-item-delete {
+            background: #ffebeb;
+            color: #ff3b30;
+            border: none;
+            padding: 6px;
+            border-radius: 6px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .game-item-delete:hover { background: #ff3b30; color: #fff; }
+        .game-item-copy {
+            background: #f0f0f5;
+            color: #1d1d1f;
+            border: none;
+            padding: 6px;
+            border-radius: 6px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .game-item-copy:hover { background: #007aff; color: #fff; }
+        
+        /* ===== 添加项目输入框 ===== */
+        .add-game-row { display: flex; gap: 8px; }
+        .add-game-input {
+            flex: 1;
+            padding: 12px 16px;
+            background: #f8f8fa;
+            border: 2px solid transparent;
+            border-radius: 12px;
+            font-size: 14px;
+        }
+        .add-game-input:focus { outline: none; border-color: #007aff; }
+        .add-game-btn {
+            padding: 12px;
+            background: #007aff;
+            color: #fff;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        /* ===== 记录列表样式 ===== */
+        .records { max-height: 400px; overflow-y: auto; }
+        .records-grid, .records-list { display: flex; flex-direction: column; gap: 8px; }
+        .record {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 14px 16px;
+            border-radius: 10px;
+            background: #f8f8fa;
+            min-height: 56px;
+        }
+        .record-info {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            min-width: 0;
+            min-height: 44px;
+            justify-content: center;
+        }
+        .record-result { font-weight: 600; font-size: 14px; line-height: 1.4; }
+        .record-time { font-size: 11px; color: #c7c7cc; white-space: nowrap; line-height: 1.4; }
+        
+        /* ===== 滑动删除样式 ===== */
+        .record-swipe {
+            position: relative;
+            overflow: hidden;
+        }
+        .record-swipe-content {
+            position: relative;
+            z-index: 2;
+            background: #f8f8fa;
+            transition: transform 0.3s ease;
+        }
+        .record-swipe-btn {
+            position: absolute;
+            top: 0;
+            right: 0;
+            bottom: 0;
+            width: 80px;
+            background: #ff3b30;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1;
+        }
+        .record-swipe-btn-inner {
+            background: #ff3b30;
+            color: #fff;
+            border: none;
+            padding: 0;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            width: 100%;
+        }
+        .record-swipe-btn-inner:active { background: #d63027; }
+        .record-swipe.swiped .record-swipe-content { transform: translateX(-80px); }
+        .record-swipe .record-swipe-btn { display: flex; }
+        .record-swipe:not(.swiped) .record-swipe-btn { display: none; }
+        
+        /* ===== 图表样式 ===== */
+        .bar-chart { margin-top: 10px; position: relative; height: 250px; }
+        
+        /* ===== 弹窗样式 ===== */
+        .modal-overlay, .confirm-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 200;
+            align-items: center;
+            justify-content: center;
+        }
+        .modal-overlay.active, .confirm-overlay.active { display: flex; }
+        .modal {
+            background: #fff;
+            border-radius: 16px;
+            padding: 24px;
+            width: 90%;
+            max-width: 400px;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+        .modal-title { font-size: 18px; font-weight: 600; color: #1d1d1f; margin-bottom: 16px; text-align: center; }
+        .game-list { display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px; }
+        .close-modal { margin-top: 16px; background: #f0f0f5; color: #1d1d1f; }
+        .confirm-modal {
+            background: #fff;
+            border-radius: 16px;
+            padding: 24px;
+            width: 90%;
+            max-width: 320px;
+        }
+        .confirm-message { font-size: 15px; color: #1d1d1f; margin-bottom: 20px; text-align: center; }
+        .confirm-buttons { display: flex; gap: 12px; }
+        .confirm-buttons .btn { flex: 1; }
+        
+        /* ===== 页面切换 ===== */
+        .settings-page { display: none; }
+        .settings-page.active { display: block; }
+        .record-page.hidden { display: none; }
+        
+        /* ===== 其他样式 ===== */
+        .tab {
+            flex: 1;
+            padding: 12px;
+            text-align: center;
+            background: #fff;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+        .tab.active { background: #007aff; color: #fff; }
+        .section-title { font-size: 14px; color: #86868b; margin-bottom: 16px; }
+        .empty { text-align: center; padding: 30px; color: #c7c7cc; }
+        .icon { width: 20px; height: 20px; }
+        .icon-sm { width: 16px; height: 16px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- 记录页 -->
+        <div id="recordPage" class="record-page">
+            <div class="header">
+                <div class="settings-btn" onclick="showSettings()">
+                    <svg class="icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.09a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg>
+                </div>
+                <div class="game-selector" onclick="showGameModal()">
+                    <span class="game-title" id="currentGameTitle">项目复盘</span>
+                    <svg class="game-icon icon-sm" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+                </div>
+                <div style="width: 36px;"></div>
+            </div>
+            
+            <div class="tabs">
+                <div class="tab active" onclick="switchTab('record')">
+                    <svg class="icon-sm" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                    记录
+                </div>
+                <div class="tab" onclick="switchTab('stats')">
+                    <svg class="icon-sm" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+                    统计
+                </div>
+            </div>
+            
+            <div id="recordTab">
+                <div class="card">
+                    <div class="section-title">选择选项</div>
+                    <div class="tags" id="optionButtons"></div>
+                </div>
+                <div class="card">
+                    <div class="section-title">最近记录</div>
+                    <div class="records" id="recentRecords"></div>
+                </div>
+            </div>
+            
+            <div id="statsTab" style="display: none;">
+                <div class="card" id="chartCard">
+                    <div class="section-title">选项分布</div>
+                    <div class="bar-chart">
+                        <canvas id="reasonChart"></canvas>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="section-title">全部记录</div>
+                    <div class="records" id="allRecords"></div>
+                </div>
+                <button class="btn btn-danger" onclick="clearAll()">
+                    <svg class="icon-sm" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                    清空当前项目数据
+                </button>
+            </div>
+        </div>
+        
+        <!-- 设置页 -->
+        <div id="settingsPage" class="settings-page">
+            <div class="header">
+                <div class="back-btn" onclick="showRecord()">
+                    <svg class="icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+                </div>
+                <div class="title">设置</div>
+                <div style="width: 36px;"></div>
+            </div>
+            
+            <div class="card">
+                <div class="section-title">管理选项</div>
+                <div id="tagManager"></div>
+                <div style="display:flex;gap:8px;margin-top:12px">
+                    <input type="text" id="newOptionInput" placeholder="添加选项..." style="flex:1;padding:12px;border:2px solid #e0e0e5;border-radius:10px;font-size:14px" onkeypress="if(event.key==='Enter')addOption(this)" />
+                    <button class="btn btn-success" onclick="addOption(document.getElementById('newOptionInput'))" style="padding:12px 20px">添加</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 项目选择弹窗 -->
+    <div class="modal-overlay" id="gameModal">
+        <div class="modal">
+            <div class="modal-title">选择项目</div>
+            <div class="game-list" id="gameList"></div>
+            <div class="add-game-row">
+                <input type="text" class="add-game-input" id="newGameInput" placeholder="输入名称或粘贴配置码..." oninput="checkInput()" />
+                <button class="add-game-btn" onclick="addGame()" id="addGameBtn" style="display:none">
+                    <svg class="icon-sm" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                </button>
+            </div>
+            <button class="btn close-modal" onclick="closeGameModal()">关闭</button>
+        </div>
+    </div>
+    
+    <!-- 确认弹窗 -->
+    <div class="confirm-overlay" id="confirmOverlay">
+        <div class="confirm-modal">
+            <div class="confirm-message" id="confirmMessage">确定删除？</div>
+            <div class="confirm-buttons">
+                <button class="btn btn-secondary" onclick="closeConfirm()">取消</button>
+                <button class="btn btn-danger" onclick="confirmAction()">删除</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ===== 全局数据 =====
+        let games = ['英雄联盟', '王者荣耀'];
+        let currentGameIndex = 0;
+        let gameTags = {};
+        let gameRecords = {};
+        let currentTab = 'record';
+        let chart = null;
+        let confirmCallback = null;
+        
+        const DEFAULT_TAGS = [
+            { name: '胜利', options: [] },
+            { name: '失败', options: ['被 gank', '团战失误', '落单', '操作失误', '视野差', '判断错', '其他'] }
+        ];
+        
+        // ===== 初始化 =====
+        function init() {
+            const savedGames = localStorage.getItem('gameReviewGames');
+            if (savedGames) games = JSON.parse(savedGames);
+            
+            const savedGameIndex = localStorage.getItem('gameReviewCurrentIndex');
+            if (savedGameIndex) currentGameIndex = parseInt(savedGameIndex);
+            
+            games.forEach((game, i) => {
+                const tagsKey = `gameReviewTags_${i}`;
+                const savedTags = localStorage.getItem(tagsKey);
+                if (savedTags) {
+                    gameTags[i] = JSON.parse(savedTags);
+                } else {
+                    const reasonsKey = `gameReviewReasons_${i}`;
+                    const savedReasons = localStorage.getItem(reasonsKey);
+                    const winLabelKey = `gameReviewWinLabel_${i}`;
+                    const lossLabelKey = `gameReviewLossLabel_${i}`;
+                    const savedWinLabel = localStorage.getItem(winLabelKey);
+                    const savedLossLabel = localStorage.getItem(lossLabelKey);
+                    
+                    gameTags[i] = [
+                        { name: savedWinLabel || '胜利', options: [] },
+                        { name: savedLossLabel || '失败', options: savedReasons ? JSON.parse(savedReasons) : [...DEFAULT_TAGS[1].options] }
+                    ];
+                }
+                
+                const recordsKey = `gameReview_${i}`;
+                const savedRecords = localStorage.getItem(recordsKey);
+                gameRecords[i] = savedRecords ? JSON.parse(savedRecords) : [];
+            });
+            
+            if (games.length === 0) {
+                games = ['项目复盘'];
+                gameTags[0] = JSON.parse(JSON.stringify(DEFAULT_TAGS));
+                gameRecords[0] = [];
+            }
+            
+            updateGameTitle();
+            renderTags();
+            renderRecords();
+            renderChart();
+        }
+        
+        // ===== 数据管理 =====
+        function getCurrentData() {
+            return {
+                tags: gameTags[currentGameIndex] || JSON.parse(JSON.stringify(DEFAULT_TAGS)),
+                records: gameRecords[currentGameIndex] || []
+            };
+        }
+        
+        function saveCurrentData() {
+            localStorage.setItem(`gameReviewTags_${currentGameIndex}`, JSON.stringify(gameTags[currentGameIndex]));
+            localStorage.setItem(`gameReview_${currentGameIndex}`, JSON.stringify(gameRecords[currentGameIndex]));
+        }
+        
+        function updateGameTitle() {
+            document.getElementById('currentGameTitle').textContent = games[currentGameIndex];
+        }
+        
+        // ===== 选项管理 =====
+        function renderTagManager() {
+            const { tags } = getCurrentData();
+            const container = document.getElementById('tagManager');
+            
+            const allOptions = [];
+            tags.forEach(tag => {
+                if (tag.options && tag.options.length > 0) {
+                    tag.options.forEach(opt => allOptions.push(opt));
+                }
+            });
+            
+            if (allOptions.length === 0) {
+                container.innerHTML = '<div style="color:#86868b;padding:20px;text-align:center">暂无选项</div>';
+                return;
+            }
+            
+            container.innerHTML = allOptions.map((opt, i) => `
+                <div class="tag-manager-item" style="display:flex;align-items:center;justify-content:space-between">
+                    <span style="font-weight:500">${opt}</span>
+                    <button class="tag-manager-delete" onclick="deleteOptionByIndex(${i})">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                    </button>
+                </div>
+            `).join('');
+        }
+        
+        function deleteOptionByIndex(index) {
+            const tags = gameTags[currentGameIndex];
+            let count = 0;
+            for (let ti = 0; ti < tags.length; ti++) {
+                const tag = tags[ti];
+                if (tag.options && tag.options.length > 0) {
+                    for (let oi = 0; oi < tag.options.length; oi++) {
+                        if (count === index) {
+                            tag.options.splice(oi, 1);
+                            saveCurrentData();
+                            renderTagManager();
+                            renderTags();
+                            return;
+                        }
+                        count++;
+                    }
+                }
+            }
+        }
+        
+        function addOption(input) {
+            const value = input.value.trim();
+            if (!value) return;
+            
+            const tags = gameTags[currentGameIndex];
+            if (!tags[0].options) tags[0].options = [];
+            tags[0].options.push(value);
+            saveCurrentData();
+            renderTagManager();
+            renderTags();
+            input.value = '';
+        }
+        
+        function renderTags() {
+            const { tags } = getCurrentData();
+            const container = document.getElementById('optionButtons');
+            
+            const allOptions = [];
+            tags.forEach(tag => {
+                if (tag.options && tag.options.length > 0) {
+                    tag.options.forEach(opt => allOptions.push({ tag: tag.name, option: opt }));
+                }
+            });
+            
+            container.innerHTML = allOptions.map(item => 
+                `<button class="option-btn" onclick="saveRecord('${item.tag}', '${item.option}')">${item.option}</button>`
+            ).join('');
+        }
+        
+        function saveRecord(tagName, reason) {
+            const data = getCurrentData();
+            data.records.unshift({
+                id: Date.now(),
+                tag: tagName,
+                reason: reason,
+                time: new Date().toLocaleString('zh-CN', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })
+            });
+            gameRecords[currentGameIndex] = data.records;
+            saveCurrentData();
+            renderRecords();
+            renderTags();
+        }
+        
+        // ===== 记录渲染 =====
+        function renderRecords() {
+            const { records } = getCurrentData();
+            const recent = records.slice(0, 3);
+            document.getElementById('recentRecords').innerHTML = renderRecordList(recent, true);
+            document.getElementById('allRecords').innerHTML = renderRecordList(records, false);
+            setTimeout(initSwipe, 0);
+        }
+        
+        function renderRecordList(list, isRecent = false) {
+            if (list.length === 0) return '<div class="empty">暂无记录</div>';
+            const containerClass = isRecent ? 'records-grid' : 'records-list';
+            return `<div class="${containerClass}">${list.map((rec, i) => {
+                const globalIdx = list.indexOf(rec);
+                return `
+                <div class="record-swipe" data-index="${globalIdx}">
+                    <div class="record-swipe-content">
+                        <div class="record">
+                            <div class="record-info">
+                                <div class="record-result">${rec.tag}${rec.reason ? '：' + rec.reason : ''}</div>
+                            </div>
+                            <div class="record-time">${rec.time}</div>
+                        </div>
+                    </div>
+                    <div class="record-swipe-btn">
+                        <button class="record-swipe-btn-inner" onclick="delRecord(${globalIdx}, event)">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                        </button>
+                    </div>
+                </div>
+            `;
+            }).join('')}</div>`;
+        }
+        
+        // ===== 图表渲染 =====
+        function renderChart() {
+            const { tags, records } = getCurrentData();
+            
+            const allStats = {};
+            (tags || []).forEach(tag => {
+                (tag.options || []).forEach(opt => {
+                    if (!allStats[opt]) allStats[opt] = 0;
+                });
+            });
+            
+            records.filter(r => r.reason).forEach(r => {
+                allStats[r.reason] = (allStats[r.reason] || 0) + 1;
+            });
+            
+            const sorted = Object.entries(allStats).filter(([_, c]) => c > 0).sort((a, b) => b[1] - a[1]);
+            
+            document.getElementById('chartCard').style.display = sorted.length > 0 ? 'block' : 'none';
+            
+            if (sorted.length === 0) {
+                if (chart) {
+                    chart.destroy();
+                    chart = null;
+                }
+                return;
+            }
+            
+            const labels = sorted.map(([name]) => name);
+            const data = sorted.map(([_, count]) => count);
+            
+            if (chart) chart.destroy();
+            
+            const ctx = document.getElementById('reasonChart').getContext('2d');
+            chart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: '次数',
+                        data: data,
+                        backgroundColor: [
+                            'rgba(255, 59, 48, 0.8)',
+                            'rgba(255, 149, 0, 0.8)',
+                            'rgba(255, 204, 0, 0.8)',
+                            'rgba(52, 199, 89, 0.8)',
+                            'rgba(0, 122, 255, 0.8)',
+                            'rgba(88, 86, 214, 0.8)',
+                            'rgba(175, 82, 222, 0.8)'
+                        ],
+                        borderColor: [
+                            'rgba(255, 59, 48, 1)',
+                            'rgba(255, 149, 0, 1)',
+                            'rgba(255, 204, 0, 1)',
+                            'rgba(52, 199, 89, 1)',
+                            'rgba(0, 122, 255, 1)',
+                            'rgba(88, 86, 214, 1)',
+                            'rgba(175, 82, 222, 1)'
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    indexAxis: 'y',
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: { x: { beginAtZero: true, ticks: { precision: 0 } } }
+                }
+            });
+        }
+        
+        // ===== Tab 切换 =====
+        function switchTab(tab) {
+            currentTab = tab;
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            event.currentTarget.classList.add('active');
+            
+            resetAllSwipes();
+            
+            document.getElementById('recordTab').style.display = tab === 'record' ? 'block' : 'none';
+            document.getElementById('statsTab').style.display = tab === 'stats' ? 'block' : 'none';
+            
+            if (tab === 'stats') renderChart();
+        }
+        
+        // ===== 删除记录 =====
+        function delRecord(i, event) {
+            if (event) {
+                event.stopPropagation();
+                event.preventDefault();
+            }
+            
+            const data = getCurrentData();
+            data.records.splice(i, 1);
+            gameRecords[currentGameIndex] = data.records;
+            saveCurrentData();
+            
+            renderRecords();
+            if (currentTab === 'stats') renderChart();
+        }
+        
+        function resetAllSwipes() {
+            document.querySelectorAll('.record-swipe').forEach(el => {
+                el.classList.remove('swiped');
+                const content = el.querySelector('.record-swipe-content');
+                if (content) content.style.transform = '';
+            });
+        }
+        
+        // ===== 确认弹窗 =====
+        function showConfirm(message, callback) {
+            document.getElementById('confirmMessage').textContent = message;
+            document.getElementById('confirmOverlay').classList.add('active');
+            confirmCallback = callback;
+        }
+        
+        function closeConfirm() {
+            document.getElementById('confirmOverlay').classList.remove('active');
+            confirmCallback = null;
+        }
+        
+        function confirmAction() {
+            if (confirmCallback) confirmCallback();
+            closeConfirm();
+        }
+        
+        function clearAll() {
+            showConfirm(`清空"${games[currentGameIndex]}"的数据？`, () => {
+                gameRecords[currentGameIndex] = [];
+                saveCurrentData();
+                renderRecords();
+                renderChart();
+            });
+        }
+        
+        // ===== 页面导航 =====
+        function showSettings() {
+            resetAllSwipes();
+            document.getElementById('recordPage').classList.add('hidden');
+            document.getElementById('settingsPage').classList.add('active');
+            renderTagManager();
+        }
+        
+        function showRecord() {
+            resetAllSwipes();
+            document.getElementById('recordPage').classList.remove('hidden');
+            document.getElementById('settingsPage').classList.remove('active');
+        }
+        
+        // ===== 项目管理 =====
+        function showGameModal() {
+            renderGameList();
+            document.getElementById('gameModal').classList.add('active');
+        }
+        
+        function closeGameModal() {
+            document.getElementById('gameModal').classList.remove('active');
+        }
+        
+        function checkInput() {
+            const input = document.getElementById('newGameInput');
+            const addBtn = document.getElementById('addGameBtn');
+            
+            if (input.value.trim().length > 0) {
+                addBtn.style.display = 'flex';
+            } else {
+                addBtn.style.display = 'none';
+            }
+        }
+        
+        function renderGameList() {
+            const list = document.getElementById('gameList');
+            list.innerHTML = games.map((game, i) => {
+                const count = (gameRecords[i] || []).length;
+                return `
+                    <div class="game-item ${i === currentGameIndex ? 'active' : ''}" onclick="selectGame(${i})">
+                        <div style="flex:1">
+                            <div class="game-item-name">${game}</div>
+                            <div class="game-item-count">${count} 条记录</div>
+                        </div>
+                        <div style="display:flex;align-items:center;gap:8px">
+                            <button class="game-item-copy" onclick="event.stopPropagation();copyProject(${i})" title="复制配置">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+                            </button>
+                            <button class="game-item-delete" onclick="event.stopPropagation();deleteGame(${i})">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+        
+        function selectGame(i) {
+            currentGameIndex = i;
+            localStorage.setItem('gameReviewCurrentIndex', i);
+            updateGameTitle();
+            renderTags();
+            renderRecords();
+            renderChart();
+            renderTagManager();
+            closeGameModal();
+        }
+        
+        function addGame() {
+            const input = document.getElementById('newGameInput');
+            const value = input.value.trim();
+            if (!value) return;
+            
+            // 检查是否是配置码
+            if (value.length > 50 && /^[A-Za-z0-9+/=]+$/.test(value)) {
+                try {
+                    const config = JSON.parse(decodeURIComponent(atob(value)));
+                    if (config.game && Array.isArray(config.tags)) {
+                        let idx = games.indexOf(config.game);
+                        if (idx === -1) {
+                            games.push(config.game);
+                            idx = games.length - 1;
+                            gameTags[idx] = [];
+                            gameRecords[idx] = [];
+                        }
+                        
+                        gameTags[idx] = config.tags.map(t => ({
+                            name: t.name,
+                            options: t.options || []
+                        }));
+                        
+                        if (config.records) {
+                            gameRecords[idx] = config.records;
+                        }
+                        
+                        localStorage.setItem('gameReviewGames', JSON.stringify(games));
+                        localStorage.setItem(`gameReviewTags_${idx}`, JSON.stringify(gameTags[idx]));
+                        localStorage.setItem(`gameReview_${idx}`, JSON.stringify(gameRecords[idx]));
+                        
+                        input.value = '';
+                        checkInput();
+                        renderGameList();
+                        
+                        // 如果是当前项目，立即刷新选项
+                        if (idx === currentGameIndex) {
+                            renderTags();
+                        }
+                        
+                        return;
+                    }
+                } catch (e) {
+                    // 不是配置码，按新项目处理
+                }
+            }
+            
+            // 新项目
+            games.push(value);
+            gameTags[games.length - 1] = JSON.parse(JSON.stringify(DEFAULT_TAGS));
+            gameRecords[games.length - 1] = [];
+            localStorage.setItem('gameReviewGames', JSON.stringify(games));
+            
+            input.value = '';
+            checkInput();
+            renderGameList();
+        }
+        
+        function copyProject(i) {
+            const config = {
+                game: games[i],
+                tags: gameTags[i] || [],
+                version: '3.0'
+            };
+            const configStr = btoa(encodeURIComponent(JSON.stringify(config)));
+            
+            const tempInput = document.createElement('textarea');
+            tempInput.value = configStr;
+            document.body.appendChild(tempInput);
+            tempInput.select();
+            document.execCommand('copy');
+            document.body.removeChild(tempInput);
+        }
+        
+        function deleteGame(i) {
+            if (games.length <= 1) return;
+            
+            showConfirm(`删除"${games[i]}"？`, () => {
+                games.splice(i, 1);
+                delete gameTags[i];
+                delete gameRecords[i];
+                
+                const newTags = {};
+                const newRecords = {};
+                Object.keys(gameTags).forEach((key, idx) => {
+                    if (parseInt(key) > i) {
+                        newTags[idx] = gameTags[key];
+                        newRecords[idx] = gameRecords[key];
+                    } else {
+                        newTags[key] = gameTags[key];
+                        newRecords[key] = gameRecords[key];
+                    }
+                });
+                gameTags = newTags;
+                gameRecords = newRecords;
+                
+                localStorage.setItem('gameReviewGames', JSON.stringify(games));
+                Object.keys(gameTags).forEach(idx => {
+                    localStorage.setItem(`gameReviewTags_${idx}`, JSON.stringify(gameTags[idx]));
+                    localStorage.setItem(`gameReview_${idx}`, JSON.stringify(gameRecords[idx]));
+                });
+                
+                if (currentGameIndex >= games.length) {
+                    currentGameIndex = games.length - 1;
+                    localStorage.setItem('gameReviewCurrentIndex', currentGameIndex);
+                }
+                
+                updateGameTitle();
+                renderGameList();
+                renderTags();
+                renderRecords();
+                renderChart();
+            });
+        }
+        
+        // ===== 滑动删除 =====
+        function initSwipe() {
+            document.querySelectorAll('.record-swipe').forEach(swipe => {
+                let startX = 0, currentX = 0, isSwiping = false, isLongPress = false;
+                const threshold = 50;
+                let longPressTimer = null;
+                
+                swipe.addEventListener('touchstart', (e) => {
+                    if (e.target.closest('.record-swipe-btn')) return;
+                    startX = e.touches[0].clientX;
+                    currentX = startX;
+                    isSwiping = true;
+                    isLongPress = true;
+                    resetAllSwipes();
+                    
+                    const globalIdx = swipe.dataset.index;
+                    longPressTimer = setTimeout(() => {
+                        if (isLongPress) {
+                            showConfirm('确定删除这条记录？', () => {
+                                delRecord(parseInt(globalIdx));
+                            });
+                            isLongPress = false;
+                        }
+                    }, 500);
+                }, { passive: true });
+                
+                swipe.addEventListener('touchmove', (e) => {
+                    if (!isSwiping) return;
+                    currentX = e.touches[0].clientX;
+                    const diff = startX - currentX;
+                    
+                    if (Math.abs(diff) > 10 && isLongPress && longPressTimer) {
+                        clearTimeout(longPressTimer);
+                        longPressTimer = null;
+                        isLongPress = false;
+                    }
+                    
+                    if (diff > 0) {
+                        const content = swipe.querySelector('.record-swipe-content');
+                        content.style.transform = `translateX(${-Math.min(diff, 80)}px)`;
+                    }
+                }, { passive: true });
+                
+                swipe.addEventListener('touchend', () => {
+                    if (longPressTimer) {
+                        clearTimeout(longPressTimer);
+                        longPressTimer = null;
+                    }
+                    
+                    if (!isSwiping) return;
+                    const diff = startX - currentX;
+                    if (diff > threshold) {
+                        swipe.classList.add('swiped');
+                    } else {
+                        swipe.classList.remove('swiped');
+                    }
+                    isSwiping = false;
+                    currentX = 0;
+                });
+                
+                swipe.querySelector('.record-swipe-content').addEventListener('click', () => {
+                    if (swipe.classList.contains('swiped')) resetAllSwipes();
+                });
+            });
+        }
+        
+        // 点击页面其他地方关闭滑动
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('.record-swipe')) resetAllSwipes();
+        });
+        
+        // ===== 启动应用 =====
+        init();
+    </script>
+</body>
+</html>
