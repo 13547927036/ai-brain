@@ -59,8 +59,17 @@
         .add-game-btn{padding:12px;background:#007aff;color:#fff;border:none;border-radius:12px;cursor:pointer;display:flex;align-items:center;justify-content:center}
         .records{max-height:400px;overflow-y:auto}
         .record{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;border-radius:10px;background:#f8f8fa;min-height:56px}
+        .record-info{flex:1;display:flex;flex-direction:column;gap:4px;min-width:0;min-height:44px;justify-content:center}
         .record-result{font-weight:600;font-size:14px;line-height:1.4}
         .record-time{font-size:11px;color:#c7c7cc;white-space:nowrap;line-height:1.4}
+        .record-swipe{position:relative;overflow:hidden}
+        .record-swipe-content{position:relative;z-index:2;background:#f8f8fa;transition:transform 0.3s ease}
+        .record-swipe-btn{position:absolute;top:0;right:0;bottom:0;width:80px;background:#ff3b30;display:flex;align-items:center;justify-content:center;z-index:1}
+        .record-swipe-btn-inner{background:#ff3b30;color:#fff;border:none;padding:0;height:100%;display:flex;align-items:center;justify-content:center;cursor:pointer;width:100%}
+        .record-swipe-btn-inner:active{background:#d63027}
+        .record-swipe.swiped .record-swipe-content{transform:translateX(-80px)}
+        .record-swipe .record-swipe-btn{display:flex}
+        .record-swipe:not(.swiped) .record-swipe-btn{display:none}
         .bar-chart{margin-top:10px;position:relative;height:250px}
         .modal-overlay,.confirm-overlay{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:200;align-items:center;justify-content:center}
         .modal-overlay.active,.confirm-overlay.active{display:flex}
@@ -338,9 +347,111 @@
             const recentContainer = document.getElementById('recentRecords');
             const allContainer = document.getElementById('allRecords');
             if (records.length === 0) { recentContainer.innerHTML = '<div class="empty">暂无记录</div>'; allContainer.innerHTML = '<div class="empty">暂无记录</div>'; return; }
-            recentContainer.innerHTML = records.slice(0, 10).map(r => `<div class="record"><span class="record-result">${r.reason}</span><span class="record-time">${r.time}</span></div>`).join('');
-            allContainer.innerHTML = records.map(r => `<div class="record"><span class="record-result">${r.reason}</span><span class="record-time">${r.time}</span></div>`).join('');
+            recentContainer.innerHTML = records.slice(0, 10).map((r, i) => `
+                <div class="record-swipe" data-index="${i}">
+                    <div class="record-swipe-content">
+                        <div class="record">
+                            <div class="record-info">
+                                <div class="record-result">${r.reason}</div>
+                            </div>
+                            <div class="record-time">${r.time}</div>
+                        </div>
+                    </div>
+                    <div class="record-swipe-btn">
+                        <button class="record-swipe-btn-inner" onclick="deleteRecord(${i}, event)">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+            allContainer.innerHTML = records.map((r, i) => `
+                <div class="record-swipe" data-index="${i}">
+                    <div class="record-swipe-content">
+                        <div class="record">
+                            <div class="record-info">
+                                <div class="record-result">${r.reason}</div>
+                            </div>
+                            <div class="record-time">${r.time}</div>
+                        </div>
+                    </div>
+                    <div class="record-swipe-btn">
+                        <button class="record-swipe-btn-inner" onclick="deleteRecord(${i}, event)">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+            setTimeout(initSwipe, 0);
         }
+        
+        async function deleteRecord(index, event) {
+            if (event) { event.stopPropagation(); event.preventDefault(); }
+            const records = gameRecords[currentGameId] || [];
+            const record = records[index];
+            if (currentUser?.is_guest) {
+                records.splice(index, 1);
+                gameRecords[currentGameId] = records;
+                localStorage.setItem(`guest_records_${currentGameId}`, JSON.stringify(records));
+                renderRecords();
+                return;
+            }
+            await sb.from('records').delete().eq('id', record.id);
+            await loadCurrentData();
+            renderRecords();
+        }
+        
+        function initSwipe() {
+            document.querySelectorAll('.record-swipe').forEach(swipe => {
+                let startX = 0, currentX = 0, isSwiping = false;
+                const threshold = 50;
+                
+                swipe.addEventListener('touchstart', (e) => {
+                    if (e.target.closest('.record-swipe-btn')) return;
+                    startX = e.touches[0].clientX;
+                    currentX = startX;
+                    isSwiping = true;
+                    resetAllSwipes();
+                }, { passive: true });
+                
+                swipe.addEventListener('touchmove', (e) => {
+                    if (!isSwiping) return;
+                    currentX = e.touches[0].clientX;
+                    const diff = startX - currentX;
+                    if (diff > 0) {
+                        const content = swipe.querySelector('.record-swipe-content');
+                        content.style.transform = `translateX(${-Math.min(diff, 80)}px)`;
+                    }
+                }, { passive: true });
+                
+                swipe.addEventListener('touchend', () => {
+                    if (!isSwiping) return;
+                    const diff = startX - currentX;
+                    if (diff > threshold) {
+                        swipe.classList.add('swiped');
+                    } else {
+                        swipe.classList.remove('swiped');
+                    }
+                    isSwiping = false;
+                    currentX = 0;
+                });
+                
+                swipe.querySelector('.record-swipe-content').addEventListener('click', () => {
+                    if (swipe.classList.contains('swiped')) resetAllSwipes();
+                });
+            });
+        }
+        
+        function resetAllSwipes() {
+            document.querySelectorAll('.record-swipe').forEach(el => {
+                el.classList.remove('swiped');
+                const content = el.querySelector('.record-swipe-content');
+                if (content) content.style.transform = '';
+            });
+        }
+        
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('.record-swipe')) resetAllSwipes();
+        });
         
         function switchTab(tab) {
             document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
