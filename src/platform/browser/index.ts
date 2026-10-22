@@ -201,6 +201,15 @@ export function createBrowserPlatform(opts: CreatePlatformOptions = {}): Platfor
     beginFrame(): void {
       // 点击由上层通过 takeTaps 消费，这里不做清空
     },
+    loadImage(src: string): Promise<CanvasImageSource | null> {
+      return new Promise((resolve) => {
+        const img = new Image();
+        // 失败不抛：调用方回退到几何图形，不能让一张图拖垮整局
+        img.onload = () => resolve(img);
+        img.onerror = () => resolve(null);
+        img.src = src;
+      });
+    },
     onHide(cb: () => void): void {
       document.addEventListener('visibilitychange', () => {
         if (document.visibilityState === 'hidden') cb();

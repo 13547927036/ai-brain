@@ -1,4 +1,4 @@
-﻿/**
+/**
  * 微信小游戏 API 的最小类型面。
  *
  * 只声明本项目实际用到的部分，并把 wx 作为**参数注入**，
@@ -28,8 +28,18 @@ export interface WxSystemInfo {
   pixelRatio: number;
 }
 
+/** wx.createImage() 返回的图片对象 */
+export interface WxImage {
+  src: string;
+  width: number;
+  height: number;
+  onload: (() => void) | null;
+  onerror: (() => void) | null;
+}
+
 export interface WxApi {
   createCanvas(): WxCanvas;
+  createImage?(): WxImage;
   getSystemInfoSync(): WxSystemInfo;
   onTouchStart(cb: (e: WxTouchEvent) => void): void;
   onTouchMove(cb: (e: WxTouchEvent) => void): void;

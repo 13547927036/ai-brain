@@ -15,8 +15,18 @@ import type { PointerState } from '../platform/types.js';
 
 const FONT_STACK = 'ui-monospace, "Cascadia Mono", Consolas, monospace';
 
+/** 玩家立绘绘制边长（逻辑像素）。碰撞半径 16，贴图略大更好看 */
+const PLAYER_SPRITE_SIZE = 52;
+
 export class Renderer {
   private readonly ctx: CanvasRenderingContext2D;
+  /** 玩家立绘。null 表示没有贴图资源，回退到几何图形 */
+  private playerSprites: { normal: CanvasImageSource; hit?: CanvasImageSource } | null = null;
+
+  /** 换人/换皮时重设立绘 */
+  setPlayerSprites(s: { normal: CanvasImageSource; hit?: CanvasImageSource } | null): void {
+    this.playerSprites = s;
+  }
 
   constructor(private readonly canvas: HTMLCanvasElement) {
     const ctx = canvas.getContext('2d', { alpha: false });
@@ -71,17 +81,28 @@ export class Renderer {
 
     // 玩家
     const pl = w.player;
-    ctx.fillStyle = p.player;
+    const sp = this.playerSprites;
+    if (sp) {
+      // 受击时切到受击图，比单纯闪白更能读出「我挨打了」
+      const img = pl.invuln > 0 && sp.hit ? sp.hit : sp.normal;
+      const size = PLAYER_SPRITE_SIZE;
+      ctx.drawImage(img, pl.x - size / 2, pl.y - size / 2, size, size);
+    } else {
+      // 没有贴图资源时回退几何图形，保证无美术也能跑
+      ctx.fillStyle = p.player;
+      ctx.beginPath();
+      ctx.arc(pl.x, pl.y, 16, 0, Math.PI * 2);
+      ctx.fill();
+    }
+    // 朝向缺口：让「自动开火朝哪打」可见。画在贴图外侧，避免糊住立绘
+    ctx.globalAlpha = 0.55;
+    ctx.strokeStyle = p.text;
+    ctx.lineWidth = 4;
     ctx.beginPath();
-    ctx.arc(pl.x, pl.y, 16, 0, Math.PI * 2);
-    ctx.fill();
-    // 朝向缺口：让「自动开火朝哪打」可见
-    ctx.strokeStyle = p.bg;
-    ctx.lineWidth = 5;
-    ctx.beginPath();
-    ctx.moveTo(pl.x, pl.y);
-    ctx.lineTo(pl.x + pl.facingX * 22, pl.y + pl.facingY * 22);
+    ctx.moveTo(pl.x + pl.facingX * 20, pl.y + pl.facingY * 20);
+    ctx.lineTo(pl.x + pl.facingX * 30, pl.y + pl.facingY * 30);
     ctx.stroke();
+    ctx.globalAlpha = 1;
     // 受击无敌帧闪烁
     if (pl.invuln > 0) {
       ctx.strokeStyle = p.text;

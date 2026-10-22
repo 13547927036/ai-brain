@@ -190,6 +190,16 @@ export function createWechatPlatform(wx: WxApi, opts: WechatPlatformOptions = {}
     beginFrame(): void {
       /* 点击由上层 takeTaps 消费 */
     },
+    loadImage(src: string): Promise<CanvasImageSource | null> {
+      if (!wx.createImage) return Promise.resolve(null);
+      return new Promise((resolve) => {
+        const img = wx.createImage!();
+        img.onload = () => resolve(img as unknown as CanvasImageSource);
+        // 失败不抛：缺图时渲染层回退到几何图形
+        img.onerror = () => resolve(null);
+        img.src = src;
+      });
+    },
     onHide(cb: () => void): void {
       hideCbs.push(cb);
     },

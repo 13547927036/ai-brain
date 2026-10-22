@@ -65,6 +65,11 @@ export interface View {
 }
 
 export interface Platform {
+  /**
+   * 加载图片资源。失败或不支持时返回 null，调用方回退到几何图形。
+   * 用 CanvasImageSource 而不是 HTMLImageElement，微信侧才能复用同一签名。
+   */
+  loadImage?(src: string): Promise<CanvasImageSource | null>;
   readonly canvas: HTMLCanvasElement;
   readonly view: View;
   readonly input: InputSource;

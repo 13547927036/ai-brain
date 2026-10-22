@@ -3,6 +3,8 @@
  * 默认值是 Chiikawa 占位（仅本地验证用，不发布 —— 见 spec 6.2 合规边界）。
  */
 
+import { CHARACTER_SPRITES } from './sprites.js';
+
 export interface ThemePalette {
   bg: string;
   arenaBorder: string;
@@ -26,6 +28,11 @@ export interface ThemeDef {
   palette: ThemePalette;
   /** appearanceId -> 贴图资源键。换皮时替换整张映射表 */
   appearanceKeys: Record<string, string>;
+  /**
+   * 贴图资源键 -> 图片地址。缺省时相关角色回退到几何图形绘制，
+   * 所以没有美术资源也能跑。
+   */
+  sprites?: Record<string, { normal: string; hit?: string }>;
 }
 
 export const CHIIKAWA_PLACEHOLDER: ThemeDef = {
@@ -55,6 +62,7 @@ export const CHIIKAWA_PLACEHOLDER: ThemeDef = {
     enemyShooter: 'enemy_shooter',
     enemyBoss: 'enemy_boss',
   },
+  sprites: CHARACTER_SPRITES,
 };
 
 export const ORIGINAL_SKIN: ThemeDef = {

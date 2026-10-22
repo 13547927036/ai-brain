@@ -81,6 +81,11 @@ export class UI {
     this.buttons.set(id, r);
   }
 
+  /** 以 (cx,cy) 为中心画一张图。选角界面的立绘用它 */
+  image(img: CanvasImageSource, cx: number, cy: number, size: number): void {
+    this.ctx.drawImage(img, cx - size / 2, cy - size / 2, size, size);
+  }
+
   hitTest(x: number, y: number): string | null {
     // 后画的在上层，所以倒序命中
     const entries = [...this.buttons.entries()].reverse();

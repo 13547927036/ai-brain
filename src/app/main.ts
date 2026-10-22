@@ -26,6 +26,40 @@ let lastTime = 0;
 let lastPhase = '';
 /** 可续玩的存档（启动读一次，之后随阶段变化更新） */
 let savedSnapshot: RunSnapshot | null = loadRun(platform.storage);
+/** appearanceKey -> 已加载贴图。缺失时渲染层回退几何图形 */
+const spriteCache = new Map<string, { normal: CanvasImageSource; hit?: CanvasImageSource }>();
+
+/** 角色 id -> 主题里的 appearanceId（hachiware -> playerHachiware） */
+function appearanceKeyFor(characterId: string): string {
+  const appearanceId = 'player' + characterId.charAt(0).toUpperCase() + characterId.slice(1);
+  return theme.appearanceKeys[appearanceId] ?? '';
+}
+
+/** 把已加载的贴图交给渲染器；没有资源时传 null 回退到圆点 */
+function applyPlayerSprites(characterId: string): void {
+  renderer.setPlayerSprites(spriteCache.get(appearanceKeyFor(characterId)) ?? null);
+}
+
+/** 选角卡片的立绘 */
+function portraitFor(characterId: string): CanvasImageSource | null {
+  return spriteCache.get(appearanceKeyFor(characterId))?.normal ?? null;
+}
+
+/** 预加载主题登记的贴图。失败不影响开局，只是没有立绘。 */
+async function loadThemeSprites(): Promise<void> {
+  const load = platform.loadImage?.bind(platform);
+  if (!load) return;
+  for (const [key, ref] of Object.entries(theme.sprites ?? {})) {
+    const normal = await load(ref.normal);
+    if (!normal) continue;
+    const hit = ref.hit ? await load(ref.hit) : null;
+    spriteCache.set(key, { normal, hit: hit ?? undefined });
+  }
+  // 图是异步到的：若这期间已经开局，补上立绘
+  if (run) applyPlayerSprites(run.character.id);
+}
+
+void loadThemeSprites();
 
 /**
  * 阶段切换时持久化。
@@ -87,6 +121,7 @@ function handleTap(id: string): void {
   if (screen === 'select') {
     if (id === 'resume' && savedSnapshot) {
       run = restoreRun(savedSnapshot);
+      applyPlayerSprites(run.character.id);
       screen = 'run';
       lastPhase = run.phase;
       platform.audio.play('waveStart');
@@ -96,6 +131,7 @@ function handleTap(id: string): void {
       const characterId = id.slice(5);
       if (!CHARACTERS.some((c) => c.id === characterId)) return;
       run = createRun({ characterId, seed: Date.now() & 0x7fffffff });
+      applyPlayerSprites(characterId);
       beginWave(run, 1);
       screen = 'run';
       clearRun(platform.storage);
@@ -205,7 +241,7 @@ function frame(now: number): void {
   if (screen === 'select') {
     renderer.drawWorld(emptyWorldForBackdrop(), theme, platform.input.pointer, false);
     ui.begin(width);
-    drawCharacterSelect(ui, theme, savedSnapshot !== null);
+    drawCharacterSelect(ui, theme, savedSnapshot !== null, portraitFor);
   } else if (run) {
     const showJoystick = run.phase === 'battle';
     renderer.drawWorld(run.world, theme, platform.input.pointer, showJoystick);
@@ -261,6 +297,7 @@ const debugHandle = {
   const match = wanted ? CHARACTERS.find((c) => c.id === wanted) : undefined;
   if (match) {
     run = createRun({ characterId: match.id, seed: 20261022 });
+    applyPlayerSprites(match.id);
     beginWave(run, 1);
     screen = 'run';
   }

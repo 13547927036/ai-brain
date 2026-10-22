@@ -152,10 +152,18 @@ export function drawEnd(ui: UI, run: Run, theme: ThemeDef, victory: boolean): vo
   ui.button('restart', { x: 200, y: 760, w: 350, h: 88 }, '再来一局', { fill: '#2d6a4f', size: 32 });
 }
 
+/** 角色 id -> 立绘。没加载到就返回 null，卡片退化为纯文字 */
+export type PortraitLookup = (characterId: string) => CanvasImageSource | null;
+
 /** 选角色 */
-export function drawCharacterSelect(ui: UI, theme: ThemeDef, hasSave = false): void {
+export function drawCharacterSelect(
+  ui: UI,
+  theme: ThemeDef,
+  hasSave = false,
+  portrait?: PortraitLookup,
+): void {
   backdrop(ui, 0.94);
-  ui.label('讨 伐 出 发', 375, 110, 48, theme.palette.text, 'center', 'bold');
+  ui.label('哈 气 猫', 375, 110, 48, theme.palette.text, 'center', 'bold');
   ui.label('选择角色', 375, 164, 24, '#8b93a7', 'center');
 
   if (hasSave) {
@@ -168,6 +176,8 @@ export function drawCharacterSelect(ui: UI, theme: ThemeDef, hasSave = false): v
     const y = 220 + i * 250;
     const r: Rect = { x: 50, y, w: 650, h: 220 };
     card(ui, r, '#1f2430', '#3a4150');
+    const face = portrait?.(c.id) ?? null;
+    if (face) ui.image(face, r.x + r.w - 78, y + 92, 124);
     ui.label(c.name, 90, y + 50, 34, theme.palette.text, 'left', 'bold');
     ui.label(charDesc(c), 90, y + 96, 18, '#8b93a7', 'left');
     ui.label(`生命 ${Math.round(60 * c.hpMul)} · 武器槽 ${c.weaponSlots}`, 90, y + 132, 18, '#8ecae6', 'left');

@@ -1,11 +1,11 @@
-﻿/**
+/**
  * 生成 Cloudflare Pages 上传目录。
  *
  * 不能直接上传仓库根：那里有 src/、node_modules/、.git/、docs/，
  * 传出去等于公开源码和依赖。这里只挑静态站真正需要的两个部分：
  *   index.html        入口（引用 /dist/app/main.js，绝对路径）
  *   dist/             编译产物
- * 并剔除 sourcemap 以减小体积。
+ * 并剔除 sourcemap 以减小体积。角色贴图在 assets/ 下，一并带上。
  */
 import { cp, mkdir, rm, stat, readdir } from 'node:fs/promises';
 import { spawnSync } from 'node:child_process';
@@ -25,6 +25,8 @@ await rm(stage, { recursive: true, force: true });
 await mkdir(stage, { recursive: true });
 await cp(join(root, 'index.html'), join(stage, 'index.html'));
 await cp(join(root, 'dist'), join(stage, 'dist'), { recursive: true });
+// 角色贴图：相对路径引用（assets/chars/*.png），必须一起上传
+await cp(join(root, 'assets'), join(stage, 'assets'), { recursive: true });
 
 // 剔除 sourcemap
 async function stripMaps(dir) {
