@@ -14,7 +14,9 @@
     "bench": "tsc && node --test --test-reporter=dot \"dist/render/**/*.test.js\"",
     "check:boundaries": "node tools/check-boundaries.mjs",
     "check:imports": "node tools/check-imports.mjs",
-    "build:wechat": "node tools/build-wechat.mjs"
+    "build:wechat": "node tools/build-wechat.mjs",
+    "build:cf": "node tools/build-cf.mjs",
+    "deploy:cf": "node tools/build-cf.mjs && npx wrangler pages deploy .deploy/cf --project-name brotato-like-minigame --branch main"
   },
   "devDependencies": {
     "typescript": "^7.0.2",

@@ -9,3 +9,9 @@ shot-*.png
 
 # 微信小游戏构建产物
 wechat/dist/
+
+.deploy/
+login*.log
+server*.log
+server.err.log
+.cf-token
