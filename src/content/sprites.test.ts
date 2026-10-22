@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { CHARACTER_SPRITES, getSprite, spriteKeys } from './sprites.js';
+import { CHARACTER_SPRITES, getSprite, spriteKeys, SPRITE_VERSION } from './sprites.js';
 import { CHIIKAWA_PLACEHOLDER, getTheme } from './theme.js';
 
 test('三个可玩角色都有贴图，且都带受击图', () => {
@@ -25,6 +25,16 @@ test('常态图与受击图指向不同文件', () => {
   for (const key of spriteKeys()) {
     const ref = CHARACTER_SPRITES[key]!;
     assert.notEqual(ref.normal, ref.hit, `${key} 的受击图与常态图相同`);
+  }
+});
+
+test('文件名带版本号，且不使用查询串（微信对 query 支持不一致）', () => {
+  for (const key of spriteKeys()) {
+    const ref = CHARACTER_SPRITES[key]!;
+    assert.ok(ref.normal.includes(`.${SPRITE_VERSION}.png`), `${key} normal 缺版本号`);
+    assert.ok(ref.hit!.includes(`.${SPRITE_VERSION}.png`), `${key} hit 缺版本号`);
+    assert.ok(!ref.normal.includes('?'), `${key} normal 不该带查询串`);
+    assert.ok(!ref.hit!.includes('?'), `${key} hit 不该带查询串`);
   }
 });
 

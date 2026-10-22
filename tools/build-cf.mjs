@@ -7,7 +7,7 @@
  *   dist/             编译产物
  * 并剔除 sourcemap 以减小体积。角色贴图在 assets/ 下，一并带上。
  */
-import { cp, mkdir, rm, stat, readdir } from 'node:fs/promises';
+import { cp, mkdir, rm, stat, readdir, writeFile } from 'node:fs/promises';
 import { spawnSync } from 'node:child_process';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -27,6 +27,21 @@ await cp(join(root, 'index.html'), join(stage, 'index.html'));
 await cp(join(root, 'dist'), join(stage, 'dist'), { recursive: true });
 // 角色贴图：相对路径引用（assets/chars/*.png），必须一起上传
 await cp(join(root, 'assets'), join(stage, 'assets'), { recursive: true });
+
+// Cloudflare Pages 默认给所有资源发 max-age=0, must-revalidate，
+// 等于每次打开都要重新下载全部 JS 和贴图。这里覆盖掉：
+//   assets/  文件名带 ?v= 版本号（见 src/content/sprites.ts），可以放心长缓存
+//   dist/    文件名不带 hash，用 stale-while-revalidate 兼顾「秒开」和「能更新」
+//   其余     index.html 保持强校验，保证外壳能及时更新
+const headers = [
+  '/assets/*',
+  '  Cache-Control: public, max-age=31536000, immutable',
+  '',
+  '/dist/*',
+  '  Cache-Control: public, max-age=60, stale-while-revalidate=86400',
+  '',
+].join('\n');
+await writeFile(join(stage, '_headers'), headers, 'utf8');
 
 // 剔除 sourcemap
 async function stripMaps(dir) {
