@@ -1,13 +1,13 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import type { KeyValueStore } from '../platform/types.js';
+import type { SaveStore } from './save.js';
 import { beginWave, createRun, runWaveToCompletion } from './run.js';
 import {
   clearRun, defaultMeta, loadMeta, loadRun, parseMeta, parseSnapshot,
   recordRunEnd, restoreRun, RUN_KEY, saveMeta, saveRun, SAVE_VERSION, snapshotRun,
 } from './save.js';
 
-function memStore(): KeyValueStore & { data: Map<string, string> } {
+function memStore(): SaveStore & { data: Map<string, string> } {
   const data = new Map<string, string>();
   return {
     data,
@@ -172,7 +172,7 @@ test('静音设置能持久化', () => {
 });
 
 test('存储抛错时不影响游戏（隐私模式）', () => {
-  const broken: KeyValueStore = {
+  const broken: SaveStore = {
     load: () => { throw new Error('denied'); },
     save: () => { throw new Error('denied'); },
     remove: () => { throw new Error('denied'); },

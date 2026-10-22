@@ -2,7 +2,16 @@ import type { Quality, StatId } from '../content/types.js';
 import { WAVE_COUNT } from '../content/waves.js';
 import { beginWave, createRun, type Run } from './run.js';
 import { generateShop } from './shop.js';
-import type { KeyValueStore } from '../platform/types.js';
+/**
+ * core 只声明自己需要的能力，不去 import platform/ ——
+ * 边界检查（tools/check-boundaries.mjs）要求 core 零平台依赖。
+ * 浏览器与微信的存储实现在结构上满足这个接口即可，无需继承。
+ */
+export interface SaveStore {
+  load(key: string): string | null;
+  save(key: string, value: string): void;
+  remove(key: string): void;
+}
 import { emptyStats } from './world.js';
 
 /**
@@ -157,7 +166,7 @@ export function restoreRun(snap: RunSnapshot): Run {
   return run;
 }
 
-export function saveRun(store: KeyValueStore, run: Run, kills = 0): void {
+export function saveRun(store: SaveStore, run: Run, kills = 0): void {
   try {
     const snapshot = snapshotRun(run, kills);
     // 第 1 波都还没打完，没有值得续的进度
@@ -168,7 +177,7 @@ export function saveRun(store: KeyValueStore, run: Run, kills = 0): void {
   }
 }
 
-export function loadRun(store: KeyValueStore): RunSnapshot | null {
+export function loadRun(store: SaveStore): RunSnapshot | null {
   try {
     return parseSnapshot(store.load(RUN_KEY));
   } catch {
@@ -176,7 +185,7 @@ export function loadRun(store: KeyValueStore): RunSnapshot | null {
   }
 }
 
-export function clearRun(store: KeyValueStore): void {
+export function clearRun(store: SaveStore): void {
   try {
     store.remove(RUN_KEY);
   } catch {
@@ -206,7 +215,7 @@ export function parseMeta(raw: string | null): MetaRecord {
   };
 }
 
-export function loadMeta(store: KeyValueStore): MetaRecord {
+export function loadMeta(store: SaveStore): MetaRecord {
   try {
     return parseMeta(store.load(META_KEY));
   } catch {
@@ -214,7 +223,7 @@ export function loadMeta(store: KeyValueStore): MetaRecord {
   }
 }
 
-export function saveMeta(store: KeyValueStore, meta: MetaRecord): void {
+export function saveMeta(store: SaveStore, meta: MetaRecord): void {
   try {
     store.save(META_KEY, JSON.stringify(meta));
   } catch {
@@ -223,7 +232,7 @@ export function saveMeta(store: KeyValueStore, meta: MetaRecord): void {
 }
 
 /** 一局结束：更新最佳记录与统计，返回新记录 */
-export function recordRunEnd(store: KeyValueStore, waveReached: number, victory: boolean, kills = 0): MetaRecord {
+export function recordRunEnd(store: SaveStore, waveReached: number, victory: boolean, kills = 0): MetaRecord {
   const meta = loadMeta(store);
   const next: MetaRecord = {
     ...meta,

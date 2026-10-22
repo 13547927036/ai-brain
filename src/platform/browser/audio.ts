@@ -1,4 +1,4 @@
-﻿import type { AudioSink, SoundId } from '../types.js';
+import type { AudioSink, SoundId } from '../types.js';
 
 /**
  * 纯程序化音效：不加载任何音频文件，全部用 WebAudio 现场合成。
@@ -36,6 +36,16 @@ const RECIPES: Record<SoundId, Recipe> = {
   win: { type: 'square', from: 523, to: 1046, duration: 0.65, gain: 0.09, noise: false },
 };
 
+/** 浏览器里取 AudioContext；微信侧会换成 wx.createWebAudioContext */
+export function acquireBrowserAudioContext(): AudioContext | null {
+  const w = window as unknown as {
+    AudioContext?: typeof AudioContext;
+    webkitAudioContext?: typeof AudioContext;
+  };
+  const Ctor = w.AudioContext ?? w.webkitAudioContext;
+  return Ctor ? new Ctor() : null;
+}
+
 export class BrowserAudio implements AudioSink {
   muted = false;
   private ctx: AudioContext | null = null;
@@ -43,14 +53,20 @@ export class BrowserAudio implements AudioSink {
   /** 同一帧内同类音效限流，避免 200 个子弹同时开火炸成噪音 */
   private lastPlayed = new Map<SoundId, number>();
 
+  /**
+   * @param acquire 取 AudioContext 的方式。默认走浏览器；
+   *   微信小游戏传入 wx.createWebAudioContext，从而复用同一套程序化音效。
+   */
+  constructor(private readonly acquire: () => AudioContext | null = acquireBrowserAudioContext) {}
+
   unlock(): void {
     if (this.ctx) {
       if (this.ctx.state === 'suspended') void this.ctx.resume();
       return;
     }
-    const Ctor = window.AudioContext ?? (window as unknown as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
-    if (!Ctor) return;
-    this.ctx = new Ctor();
+    const ctx = this.acquire();
+    if (!ctx) return;
+    this.ctx = ctx;
 
     const len = Math.floor(this.ctx.sampleRate * 0.2);
     const buf = this.ctx.createBuffer(1, len, this.ctx.sampleRate);
