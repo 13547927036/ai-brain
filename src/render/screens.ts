@@ -153,10 +153,14 @@ export function drawEnd(ui: UI, run: Run, theme: ThemeDef, victory: boolean): vo
 }
 
 /** 选角色 */
-export function drawCharacterSelect(ui: UI, theme: ThemeDef): void {
+export function drawCharacterSelect(ui: UI, theme: ThemeDef, hasSave = false): void {
   backdrop(ui, 0.94);
   ui.label('讨 伐 出 发', 375, 110, 48, theme.palette.text, 'center', 'bold');
   ui.label('选择角色', 375, 164, 24, '#8b93a7', 'center');
+
+  if (hasSave) {
+    ui.button('resume', { x: 150, y: 990, w: 450, h: 86 }, '继续上次进度', { fill: '#3d5a80', size: 30 });
+  }
 
   for (let i = 0; i < CHARACTERS.length; i++) {
     const c = CHARACTERS[i];

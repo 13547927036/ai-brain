@@ -15,6 +15,8 @@ export interface Run {
   phase: RunPhase;
   world: World;
   character: CharacterDef;
+  /** 本局种子，存档恢复时重建 RNG */
+  seed: number;
   shop: Shop | null;
   /** 当前升级三选一的候选项 */
   choices: UpgradeChoice[];
@@ -51,6 +53,7 @@ export function createRun(opts: CreateRunOptions): Run {
     phase: 'battle',
     world,
     character,
+    seed: opts.seed,
     shop: null,
     choices: [],
     stepper: new FixedStepper(),

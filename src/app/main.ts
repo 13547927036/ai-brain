@@ -1,6 +1,7 @@
 import { CHARACTERS } from '../content/characters.js';
 import { CHIIKAWA_PLACEHOLDER } from '../content/theme.js';
 import { advance, beginWave, chooseUpgrade, createRun, startNextWave, type Run } from '../core/run.js';
+import { clearRun, loadMeta, loadRun, recordRunEnd, restoreRun, saveRun, type RunSnapshot } from '../core/save.js';
 import { buySlot, rerollShop, toggleLock } from '../core/shop.js';
 import { createBrowserPlatform } from '../platform/browser/index.js';
 import type { SoundId } from '../platform/types.js';
@@ -15,9 +16,41 @@ const theme = CHIIKAWA_PLACEHOLDER;
 const renderer = new Renderer(platform.canvas);
 const ui = new UI(platform.canvas);
 
+// 启动时恢复设置
+platform.audio.setMuted(loadMeta(platform.storage).muted);
+
 let screen: Screen = 'select';
 let run: Run | null = null;
 let lastTime = 0;
+/** 上次的流程阶段，用于在阶段切换时持久化 */
+let lastPhase = '';
+/** 可续玩的存档（启动读一次，之后随阶段变化更新） */
+let savedSnapshot: RunSnapshot | null = loadRun(platform.storage);
+
+/**
+ * 阶段切换时持久化。
+ * 只在「进入新阶段」那一刻执行 —— 放在每帧会重复写盘、重复播音。
+ */
+function persistPhase(r: Run): void {
+  if (r.phase === lastPhase) return;
+  if (r.phase === 'shop') {
+    // 波末存档：中途退出 / 切后台后可续玩
+    saveRun(platform.storage, r);
+    savedSnapshot = loadRun(platform.storage);
+    platform.audio.play('waveEnd');
+  } else if (r.phase === 'defeat') {
+    clearRun(platform.storage);
+    savedSnapshot = null;
+    recordRunEnd(platform.storage, r.world.wave.index, false);
+    platform.audio.play('lose');
+  } else if (r.phase === 'victory') {
+    clearRun(platform.storage);
+    savedSnapshot = null;
+    recordRunEnd(platform.storage, r.world.wave.index, true);
+    platform.audio.play('win');
+  }
+  lastPhase = r.phase;
+}
 
 /** 把平台输入写进 player：摇杆优先，其次键盘（桌面调试） */
 function applyInput(r: Run): void {
@@ -52,12 +85,22 @@ function playEvents(world: Run['world']): void {
 
 function handleTap(id: string): void {
   if (screen === 'select') {
+    if (id === 'resume' && savedSnapshot) {
+      run = restoreRun(savedSnapshot);
+      screen = 'run';
+      lastPhase = run.phase;
+      platform.audio.play('waveStart');
+      return;
+    }
     if (id.startsWith('char:')) {
       const characterId = id.slice(5);
       if (!CHARACTERS.some((c) => c.id === characterId)) return;
       run = createRun({ characterId, seed: Date.now() & 0x7fffffff });
       beginWave(run, 1);
       screen = 'run';
+      clearRun(platform.storage);
+      savedSnapshot = null;
+      lastPhase = 'battle';
       platform.audio.play('waveStart');
     }
     return;
@@ -104,6 +147,10 @@ function handleTap(id: string): void {
   if (id === 'restart') {
     screen = 'select';
     run = null;
+    lastPhase = '';
+    // 主动重开视为放弃进度：清掉快照，选角界面不再出现「继续」
+    clearRun(platform.storage);
+    savedSnapshot = null;
     platform.audio.play('click');
   }
 }
@@ -148,8 +195,7 @@ function frame(now: number): void {
       advance(run, dt);
       playEvents(run.world);
     }
-    if (run.phase === 'defeat') platform.audio.play('lose');
-    if (run.phase === 'victory') platform.audio.play('win');
+    persistPhase(run);
   }
 
   // 3. 绘制
@@ -157,7 +203,7 @@ function frame(now: number): void {
   if (screen === 'select') {
     renderer.drawWorld(emptyWorldForBackdrop(), theme, platform.input.pointer, false);
     ui.begin(width);
-    drawCharacterSelect(ui, theme);
+    drawCharacterSelect(ui, theme, savedSnapshot !== null);
   } else if (run) {
     const showJoystick = run.phase === 'battle';
     renderer.drawWorld(run.world, theme, platform.input.pointer, showJoystick);
@@ -234,3 +280,19 @@ const debugHandle = {
     return count;
   };
 }
+
+// ---------------------------------------------------------------------------
+// 生命周期
+// ---------------------------------------------------------------------------
+
+/**
+ * 切入后台时暂停 + 落盘。
+ * rAF 在后台标签页本来就会停，逻辑自然暂停；这里补的是「落盘」——
+ * 否则玩家切出去，回来顺手关掉页面，一局就白打了。
+ */
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState !== 'hidden') return;
+  if (screen !== 'run' || !run) return;
+  saveRun(platform.storage, run);
+  savedSnapshot = loadRun(platform.storage);
+});
