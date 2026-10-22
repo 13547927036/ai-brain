@@ -1,9 +1,9 @@
 {
-  "name": "brotato-like-minigame",
+  "name": "huffcat",
   "private": true,
   "version": "0.1.0",
   "type": "module",
-  "description": "类《土豆兄弟》微信小游戏可玩原型（浏览器先行）",
+  "description": "哈气猫",
   "scripts": {
     "build": "tsc",
     "watch": "tsc --watch --preserveWatchOutput",
@@ -16,7 +16,7 @@
     "check:imports": "node tools/check-imports.mjs",
     "build:wechat": "node tools/build-wechat.mjs",
     "build:cf": "node tools/build-cf.mjs",
-    "deploy:cf": "node tools/build-cf.mjs && npx wrangler pages deploy .deploy/cf --project-name brotato-like-minigame --branch main"
+    "deploy:cf": "node tools/build-cf.mjs && npx wrangler pages deploy .deploy/cf --project-name huffcat --branch main"
   },
   "devDependencies": {
     "typescript": "^7.0.2",
