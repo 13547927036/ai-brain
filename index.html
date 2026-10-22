@@ -1,0 +1,46 @@
+﻿<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+  <title>讨伐出发 — 类土豆兄弟原型</title>
+  <style>
+    html, body {
+      margin: 0;
+      height: 100%;
+      background: #0a0a0e;
+      overflow: hidden;
+      /* 竖屏：禁止下拉刷新与长按选择 */
+      overscroll-behavior: none;
+      -webkit-user-select: none;
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
+    }
+    #game {
+      display: block;
+      touch-action: none;
+      /* 居中留黑边，保证 750x1334 完整可见 */
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      image-rendering: auto;
+    }
+    #hint {
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 8px;
+      text-align: center;
+      font: 12px ui-monospace, Consolas, monospace;
+      color: #3a3a4a;
+      pointer-events: none;
+    }
+  </style>
+</head>
+<body>
+  <canvas id="game"></canvas>
+  <div id="hint">WASD / 方向键移动 · 也可以按住画面拖动</div>
+  <script type="module" src="/dist/app/main.js"></script>
+</body>
+</html>
