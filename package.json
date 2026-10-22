@@ -1,20 +1,23 @@
 {
-    "name":  "brotato-like-minigame",
-    "private":  true,
-    "version":  "0.0.0",
-    "type":  "module",
-    "scripts":  {
-                    "build":  "tsc",
-                    "watch":  "tsc --watch --preserveWatchOutput",
-                    "serve":  "node tools/dev-server.mjs",
-                    "balance": "node tools/balance.mjs",
-    "test":  "tsc \u0026\u0026 node --test \"dist/**/*.test.js\"",
-                    "check:boundaries":  "node tools/check-boundaries.mjs",
-                    "bench":  "tsc \u0026\u0026 node --test --test-reporter=dot \"dist/render/**/*.test.js\"",
-                    "dev":  "tsc \u0026\u0026 node tools/dev-server.mjs"
-                },
-    "devDependencies":  {
-                            "typescript":  "^7.0.2",
-                            "@types/node":  "^24.0.0"
-                        }
+  "name": "brotato-like-minigame",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "description": "类《土豆兄弟》微信小游戏可玩原型（浏览器先行）",
+  "scripts": {
+    "build": "tsc",
+    "watch": "tsc --watch --preserveWatchOutput",
+    "dev": "tsc && node tools/dev-server.mjs",
+    "serve": "node tools/dev-server.mjs",
+    "test": "tsc && node --test \"dist/**/*.test.js\"",
+    "balance": "tsc && node tools/balance.mjs",
+    "bench": "tsc && node --test --test-reporter=dot \"dist/render/**/*.test.js\"",
+    "check:boundaries": "node tools/check-boundaries.mjs",
+    "check:imports": "node tools/check-imports.mjs",
+    "build:wechat": "node tools/build-wechat.mjs"
+  },
+  "devDependencies": {
+    "typescript": "^7.0.2",
+    "@types/node": "^24.0.0"
+  }
 }

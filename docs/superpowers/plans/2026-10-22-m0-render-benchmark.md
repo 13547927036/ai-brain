@@ -1,4 +1,14 @@
-﻿# M0 实施计划：零依赖工具链与 500 精灵渲染基准
+> **状态：已归档（历史文档）**
+>
+> 本文是 M0 阶段**开工前**写的计划，其中的命令与配置（如 `"test": "tsc && node --test dist"`、
+> tsconfig 的 `types` 字段）已与当前仓库不一致，**不要照本文的命令执行**。
+>
+> - 当前可用命令以 `package.json` 与 `README.md` 为准
+> - M0 的实测结论与决策见 `m0-result.md`
+> - 各里程碑的实际落地情况见 `implementation-plan.md`
+
+---
+# M0 实施计划：零依赖工具链与 500 精灵渲染基准
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
