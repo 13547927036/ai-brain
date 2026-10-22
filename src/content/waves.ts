@@ -10,10 +10,10 @@ const ROWS: Array<[number, number, number, { grunt: number; runner: number; shoo
   [21, 40, 1.9, { grunt: 0.55, runner: 0.25, shooter: 0.2 }],
   [22, 48, 2.2, { grunt: 0.5, runner: 0.25, shooter: 0.25 }],
   [23, 56, 2.4, { grunt: 0.45, runner: 0.3, shooter: 0.25 }],
-  [25, 68, 2.6, { grunt: 0.4, runner: 0.3, shooter: 0.3 }],
-  [27, 80, 2.8, { grunt: 0.4, runner: 0.3, shooter: 0.3 }],
-  [30, 95, 3.0, { grunt: 0.35, runner: 0.35, shooter: 0.3 }],
-  [36, 110, 3.2, { grunt: 0.4, runner: 0.3, shooter: 0.3 }],
+  [25, 58, 2.4, { grunt: 0.4, runner: 0.3, shooter: 0.3 }],
+  [27, 66, 2.5, { grunt: 0.4, runner: 0.3, shooter: 0.3 }],
+  [30, 76, 2.6, { grunt: 0.35, runner: 0.35, shooter: 0.3 }],
+  [36, 88, 2.8, { grunt: 0.4, runner: 0.3, shooter: 0.3 }],
 ];
 
 export const WAVES: WaveDef[] = ROWS.map(([duration, enemyCount, spawnRate, mix], i) => ({

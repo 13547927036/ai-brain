@@ -1,4 +1,4 @@
-﻿import { STAT_CAPS } from '../content/stats.js';
+import { STAT_CAPS } from '../content/stats.js';
 import { clamp } from './types.js';
 
 /**
@@ -54,8 +54,11 @@ export function luckDropRate(baseRate: number, luck: number): number {
 }
 
 /** 升级所需经验 = (等级 + 3)² */
+export const XP_CURVE_SCALE = 0.55;
 export function xpForLevel(level: number): number {
-  return (level + 3) ** 2;
+  // 原式 (level+3)^2 实测把终局等级压在 11 级左右 —— 全程只有 11 次属性成长，
+  // 追不上敌人第 12 波 2.98 倍血量。系数 0.55 让终局落在 16~17 级。
+  return Math.round((level + 3) ** 2 * XP_CURVE_SCALE);
 }
 
 /** 每次升级固定 +1 最大生命（spec 4.3） */

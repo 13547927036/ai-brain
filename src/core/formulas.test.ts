@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {
   CRIT_MULTIPLIER, REGEN_INTERVAL, armorMultiplier, applyArmor, dodgeRate,
-  attackCooldown, attacksPerSecond, moveSpeed, luckDropRate, xpForLevel,
+  attackCooldown, attacksPerSecond, moveSpeed, luckDropRate, xpForLevel, XP_CURVE_SCALE,
   setBonusMultiplier, HP_PER_LEVEL,
 } from './formulas.js';
 import { SET_BONUS_PER_WEAPON } from '../content/weapons.js';
@@ -59,10 +59,19 @@ test('幸运掉落率 = 基础掉率 × (1 + 幸运/100)', () => {
   assert.ok(Math.abs(luckDropRate(0.1, 100) - 0.2) < 1e-12);
 });
 
-test('升级经验 = (等级+3)²', () => {
-  assert.equal(xpForLevel(1), 16);
-  assert.equal(xpForLevel(2), 25);
-  assert.equal(xpForLevel(7), 100);
+test('升级经验 = (等级+3)² × 曲线系数', () => {
+  // 系数 0.55：原式把终局等级压在 ~11 级，全程只有 11 次属性成长，
+  // 追不上敌人第 12 波 2.98 倍血量。实测通关率因此从 1.4% 提升到 14%。
+  assert.equal(XP_CURVE_SCALE, 0.55);
+  assert.equal(xpForLevel(1), Math.round(16 * XP_CURVE_SCALE));
+  assert.equal(xpForLevel(2), Math.round(25 * XP_CURVE_SCALE));
+  assert.equal(xpForLevel(7), Math.round(100 * XP_CURVE_SCALE));
+  // 需求随等级单调递增，且保持平方级增长
+  for (let l = 1; l < 20; l++) {
+    assert.ok(xpForLevel(l + 1) > xpForLevel(l), `第 ${l + 1} 级需求应大于第 ${l} 级`);
+  }
+  // (10+3)² / (5+3)² = 169/64 ≈ 2.64，故取 2.5 作为下界
+  assert.ok(xpForLevel(10) > xpForLevel(5) * 2.5, '应保持平方级增长');
 });
 
 test('套装加成：1 把无加成，3 把 +16%，6 把 +40%', () => {

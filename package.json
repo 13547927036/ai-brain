@@ -1,4 +1,4 @@
-﻿{
+{
     "name":  "brotato-like-minigame",
     "private":  true,
     "version":  "0.0.0",
@@ -7,7 +7,8 @@
                     "build":  "tsc",
                     "watch":  "tsc --watch --preserveWatchOutput",
                     "serve":  "node tools/dev-server.mjs",
-                    "test":  "tsc \u0026\u0026 node --test \"dist/**/*.test.js\"",
+                    "balance": "node tools/balance.mjs",
+    "test":  "tsc \u0026\u0026 node --test \"dist/**/*.test.js\"",
                     "check:boundaries":  "node tools/check-boundaries.mjs",
                     "bench":  "tsc \u0026\u0026 node --test --test-reporter=dot \"dist/render/**/*.test.js\"",
                     "dev":  "tsc \u0026\u0026 node tools/dev-server.mjs"

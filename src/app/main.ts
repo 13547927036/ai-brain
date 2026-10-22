@@ -282,6 +282,26 @@ const debugHandle = {
 }
 
 // ---------------------------------------------------------------------------
+// 追加：真实交互路径。tap 走 hitTest -> handleTap，
+// 和玩家点屏幕完全同一条链路，用来做全流程自动通关验证。
+{
+  const dbg = (window as unknown as {
+    __game: {
+      tap?: (x: number, y: number) => string | null;
+      buttons?: () => Array<{ id: string; x: number; y: number; w: number; h: number }>;
+    };
+  }).__game;
+  dbg.buttons = () => {
+    const out: Array<{ id: string; x: number; y: number; w: number; h: number }> = [];
+    for (const [id, r] of ui.buttons) out.push({ id, x: r.x, y: r.y, w: r.w, h: r.h });
+    return out;
+  };
+  dbg.tap = (x: number, y: number): string | null => {
+    const id = ui.hitTest(x, y);
+    if (id) handleTap(id);
+    return id;
+  };
+}
 // 生命周期
 // ---------------------------------------------------------------------------
 
