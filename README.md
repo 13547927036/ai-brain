@@ -1,4 +1,4 @@
-﻿# 类《土豆兄弟》微信小游戏原型
+# 类《土豆兄弟》微信小游戏原型
 
 原生 TypeScript + Canvas2D，竖屏固定单屏竞技场，12 波 / 单局约 5~6 分钟。
 **浏览器先行验证手感**，同一份代码切到微信小游戏运行。
@@ -63,7 +63,13 @@ __game.buttons()    // 当前帧已登记的按钮
 __game.tap(x, y)    // 走真实 hitTest → handleTap 的点击
 ```
 
-URL 带 `?char=hachiware` 可直接开局跳过选角。
+URL 参数（仅开发期）：
+
+- `?char=hachiware` 直接开局，跳过选角
+- `?theme=originalSkin` 切换皮肤，未知 id 自动回退默认
+
+换皮是**纯数据切换**：`content/theme.ts` 里注册一个 `ThemeDef` 即可，
+渲染与逻辑代码一行不用改。
 
 ## 已知限制
 

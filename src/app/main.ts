@@ -1,5 +1,5 @@
 import { CHARACTERS } from '../content/characters.js';
-import { CHIIKAWA_PLACEHOLDER } from '../content/theme.js';
+import { getTheme } from '../content/theme.js';
 import { advance, beginWave, chooseUpgrade, createRun, startNextWave, type Run } from '../core/run.js';
 import { clearRun, loadMeta, loadRun, recordRunEnd, restoreRun, saveRun, type RunSnapshot } from '../core/save.js';
 import { buySlot, rerollShop, toggleLock } from '../core/shop.js';
@@ -12,7 +12,7 @@ import { drawHud, UI } from '../render/ui.js';
 type Screen = 'select' | 'run';
 
 const platform = createPlatform();
-const theme = CHIIKAWA_PLACEHOLDER;
+const theme = getTheme(typeof location === 'undefined' ? null : new URLSearchParams(location.search).get('theme'));
 const renderer = new Renderer(platform.canvas);
 const ui = new UI(platform.canvas);
 
