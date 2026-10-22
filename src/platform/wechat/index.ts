@@ -1,4 +1,4 @@
-﻿import { ARENA } from '../../core/world.js';
+import { ARENA } from '../../core/world.js';
 import type { InputSource, KeyValueStore, Platform, PointerState, Tap, View } from '../types.js';
 import { BrowserAudio } from '../browser/audio.js';
 import { JOYSTICK_RADIUS, TAP_SLOP } from '../browser/index.js';
@@ -169,8 +169,16 @@ export function createWechatPlatform(wx: WxApi, opts: WechatPlatformOptions = {}
     return factory.call(wx) as unknown as AudioContext;
   });
 
-  wx.onShow?.(() => opts.onShow?.());
-  wx.onHide?.(() => opts.onHide?.());
+  const hideCbs: Array<() => void> = [];
+  const showCbs: Array<() => void> = [];
+  wx.onShow?.(() => {
+    opts.onShow?.();
+    for (const cb of showCbs) cb();
+  });
+  wx.onHide?.(() => {
+    opts.onHide?.();
+    for (const cb of hideCbs) cb();
+  });
 
   return {
     // 微信的 canvas 不是 DOM 元素，但渲染层只用到 width/height/getContext
@@ -181,6 +189,9 @@ export function createWechatPlatform(wx: WxApi, opts: WechatPlatformOptions = {}
     audio,
     beginFrame(): void {
       /* 点击由上层 takeTaps 消费 */
+    },
+    onHide(cb: () => void): void {
+      hideCbs.push(cb);
     },
     dispose(): void {
       /* 小游戏无需解绑 */

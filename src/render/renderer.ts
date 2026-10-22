@@ -1,4 +1,5 @@
-﻿import type { ThemeDef } from '../content/theme.js';
+import type { ThemeDef } from '../content/theme.js';
+import { applyViewport, computeViewport } from './viewport.js';
 import type { Enemy, Floater, Particle, Pickup, World } from '../core/world.js';
 import type { PointerState } from '../platform/types.js';
 
@@ -23,14 +24,10 @@ export class Renderer {
     this.ctx = ctx;
   }
 
-  /** 每帧开头调用：把坐标系对齐到逻辑像素 */
+  /** 每帧开头调用：把坐标系对齐到逻辑像素（等比缩放 + 居中留边） */
   private begin(logicalW: number, logicalH: number, bg: string): void {
-    const ctx = this.ctx;
-    const s = this.canvas.width / logicalW;
-    ctx.setTransform(s, 0, 0, s, 0, 0);
-    ctx.fillStyle = bg;
-    ctx.fillRect(0, 0, logicalW, logicalH);
-    void logicalH;
+    const view = computeViewport(this.canvas.width, this.canvas.height, logicalW, logicalH);
+    applyViewport(this.ctx, view, this.canvas.width, this.canvas.height, bg);
   }
 
   drawWorld(w: World, theme: ThemeDef, joystick: PointerState, showJoystick: boolean): void {

@@ -1,4 +1,4 @@
-﻿/**
+/**
  * 平台层接口。core/ 只依赖这里的类型，永远不直接碰 document / wx。
  * 将来上微信小游戏时，新写一个 platform/wechat/ 实现即可，core 与 render 不动。
  */
@@ -72,5 +72,10 @@ export interface Platform {
   readonly audio: AudioSink;
   /** 每帧开始时的钩子 */
   beginFrame(): void;
+  /**
+   * 切到后台。浏览器走 visibilitychange，微信用 wx.onHide。
+   * 上层据此暂停 + 落盘，避免玩家接个电话回来一局白打。
+   */
+  onHide?(cb: () => void): void;
   dispose(): void;
 }

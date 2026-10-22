@@ -6,3 +6,6 @@ dist/
 .tmp/
 shot-*.png
 
+
+# 微信小游戏构建产物
+wechat/dist/

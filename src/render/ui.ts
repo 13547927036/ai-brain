@@ -1,4 +1,6 @@
-﻿import type { ThemeDef } from '../content/theme.js';
+import type { ThemeDef } from '../content/theme.js';
+import { ARENA } from '../core/world.js';
+import { computeViewport } from './viewport.js';
 import { xpForLevel } from '../core/formulas.js';
 import type { World } from '../core/world.js';
 
@@ -29,9 +31,10 @@ export class UI {
     this.ctx = ctx;
   }
 
-  begin(logicalW: number): void {
-    const s = this.ctx.canvas.width / logicalW;
-    this.ctx.setTransform(s, 0, 0, s, 0, 0);
+  begin(logicalW: number, logicalH: number = ARENA.h): void {
+    // 与 Renderer 共用同一套视口换算，避免 HUD 与场景错位
+    const view = computeViewport(this.ctx.canvas.width, this.ctx.canvas.height, logicalW, logicalH);
+    this.ctx.setTransform(view.scale, 0, 0, view.scale, view.offsetX, view.offsetY);
     this.buttons.clear();
   }
 

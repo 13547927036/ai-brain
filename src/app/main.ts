@@ -3,7 +3,7 @@ import { CHIIKAWA_PLACEHOLDER } from '../content/theme.js';
 import { advance, beginWave, chooseUpgrade, createRun, startNextWave, type Run } from '../core/run.js';
 import { clearRun, loadMeta, loadRun, recordRunEnd, restoreRun, saveRun, type RunSnapshot } from '../core/save.js';
 import { buySlot, rerollShop, toggleLock } from '../core/shop.js';
-import { createBrowserPlatform } from '../platform/browser/index.js';
+import { createPlatform } from './platform-select.js';
 import type { SoundId } from '../platform/types.js';
 import { Renderer } from '../render/renderer.js';
 import { drawCharacterSelect, drawEnd, drawLevelUp, drawShop } from '../render/screens.js';
@@ -11,7 +11,7 @@ import { drawHud, UI } from '../render/ui.js';
 
 type Screen = 'select' | 'run';
 
-const platform = createBrowserPlatform();
+const platform = createPlatform();
 const theme = CHIIKAWA_PLACEHOLDER;
 const renderer = new Renderer(platform.canvas);
 const ui = new UI(platform.canvas);
@@ -156,6 +156,8 @@ function handleTap(id: string): void {
 }
 
 function publishDebug(): void {
+  // 微信小游戏没有 DOM，调试输出只服务于浏览器
+  if (typeof document === 'undefined') return;
   const el = document.body;
   if (!el) return;
   const ds = el.dataset;
@@ -250,11 +252,12 @@ const debugHandle = {
     return count;
   },
 };
-(window as unknown as { __game: unknown }).__game = debugHandle;
+(globalThis as unknown as { __game: unknown }).__game = debugHandle;
 
 // 开发便利：?char=chiikawa 直接开局，跳过选角
 {
-  const wanted = new URLSearchParams(location.search).get('char');
+  const wanted =
+    typeof location === 'undefined' ? null : new URLSearchParams(location.search).get('char');
   const match = wanted ? CHARACTERS.find((c) => c.id === wanted) : undefined;
   if (match) {
     run = createRun({ characterId: match.id, seed: 20261022 });
@@ -264,18 +267,18 @@ const debugHandle = {
 }
 // 修正版 tick：等时推进 + 临时屏蔽 rAF（避免一次 tick(2400) 堆出 2400 个回调）
 {
-  const dbg = (window as unknown as { __game: { tick?: (n?: number) => number } }).__game;
+  const dbg = (globalThis as unknown as { __game: { tick?: (n?: number) => number } }).__game;
   dbg.tick = (count = 1): number => {
     let t = lastTime === 0 ? performance.now() : lastTime;
-    const origRaf = window.requestAnimationFrame;
-    window.requestAnimationFrame = (() => 0) as unknown as typeof window.requestAnimationFrame;
+    const origRaf = globalThis.requestAnimationFrame;
+    globalThis.requestAnimationFrame = (() => 0) as unknown as typeof globalThis.requestAnimationFrame;
     try {
       for (let i = 0; i < count; i++) {
         t += 1000 / 60;
         frame(t);
       }
     } finally {
-      window.requestAnimationFrame = origRaf;
+      globalThis.requestAnimationFrame = origRaf;
     }
     return count;
   };
@@ -285,7 +288,7 @@ const debugHandle = {
 // 追加：真实交互路径。tap 走 hitTest -> handleTap，
 // 和玩家点屏幕完全同一条链路，用来做全流程自动通关验证。
 {
-  const dbg = (window as unknown as {
+  const dbg = (globalThis as unknown as {
     __game: {
       tap?: (x: number, y: number) => string | null;
       buttons?: () => Array<{ id: string; x: number; y: number; w: number; h: number }>;
@@ -310,8 +313,7 @@ const debugHandle = {
  * rAF 在后台标签页本来就会停，逻辑自然暂停；这里补的是「落盘」——
  * 否则玩家切出去，回来顺手关掉页面，一局就白打了。
  */
-document.addEventListener('visibilitychange', () => {
-  if (document.visibilityState !== 'hidden') return;
+platform.onHide?.(() => {
   if (screen !== 'run' || !run) return;
   saveRun(platform.storage, run);
   savedSnapshot = loadRun(platform.storage);

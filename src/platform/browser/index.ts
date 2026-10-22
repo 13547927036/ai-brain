@@ -201,6 +201,11 @@ export function createBrowserPlatform(opts: CreatePlatformOptions = {}): Platfor
     beginFrame(): void {
       // 点击由上层通过 takeTaps 消费，这里不做清空
     },
+    onHide(cb: () => void): void {
+      document.addEventListener('visibilitychange', () => {
+        if (document.visibilityState === 'hidden') cb();
+      });
+    },
     dispose(): void {
       window.removeEventListener('resize', resize);
     },
