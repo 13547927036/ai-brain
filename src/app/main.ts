@@ -191,3 +191,46 @@ function emptyWorldForBackdrop(): Run['world'] {
 let backdropWorld: Run['world'] | null = null;
 
 requestAnimationFrame(frame);
+
+// ---- 调试钩子（仅开发期使用）----
+// tick() 用于绕过 Chrome 对后台标签页 requestAnimationFrame 的节流：
+// 标签页不在前台时 rAF 一帧都不会触发，自动化验证必须手动推进。
+const debugHandle = {
+  get screen(): string { return screen; },
+  get run(): Run | null { return run; },
+  handleTap,
+  tick(count = 1): number {
+    for (let i = 0; i < count; i++) frame(performance.now());
+    return count;
+  },
+};
+(window as unknown as { __game: unknown }).__game = debugHandle;
+
+// 开发便利：?char=chiikawa 直接开局，跳过选角
+{
+  const wanted = new URLSearchParams(location.search).get('char');
+  const match = wanted ? CHARACTERS.find((c) => c.id === wanted) : undefined;
+  if (match) {
+    run = createRun({ characterId: match.id, seed: 20261022 });
+    beginWave(run, 1);
+    screen = 'run';
+  }
+}
+// 修正版 tick：等时推进 + 临时屏蔽 rAF（避免一次 tick(2400) 堆出 2400 个回调）
+{
+  const dbg = (window as unknown as { __game: { tick?: (n?: number) => number } }).__game;
+  dbg.tick = (count = 1): number => {
+    let t = lastTime === 0 ? performance.now() : lastTime;
+    const origRaf = window.requestAnimationFrame;
+    window.requestAnimationFrame = (() => 0) as unknown as typeof window.requestAnimationFrame;
+    try {
+      for (let i = 0; i < count; i++) {
+        t += 1000 / 60;
+        frame(t);
+      }
+    } finally {
+      window.requestAnimationFrame = origRaf;
+    }
+    return count;
+  };
+}

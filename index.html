@@ -1,4 +1,4 @@
-﻿<!doctype html>
+<!doctype html>
 <html lang="zh-CN">
 <head>
   <meta charset="utf-8">
@@ -41,6 +41,24 @@
 <body>
   <canvas id="game"></canvas>
   <div id="hint">WASD / 方向键移动 · 也可以按住画面拖动</div>
+  <script>
+    // 全局错误捕获。同时写进 document.body.dataset.error，
+    // 因为浏览器自动化的 eval 跑在隔离 JS 世界里，读不到 window 上的变量，但 DOM 是共享的。
+    window.__errors = [];
+    function __recordError(msg) {
+      window.__errors.push(msg);
+      try {
+        document.body.dataset.error = String(msg).slice(0, 400);
+        document.body.dataset.errorCount = String(window.__errors.length);
+      } catch (_) { /* body 可能还不存在 */ }
+    }
+    window.addEventListener('error', function (e) {
+      __recordError((e && e.message) || e);
+    }, true);
+    window.addEventListener('unhandledrejection', function (e) {
+      __recordError('promise: ' + ((e && e.reason && e.reason.message) || (e && e.reason) || e));
+    });
+  </script>
   <script type="module" src="/dist/app/main.js"></script>
 </body>
 </html>
