@@ -1,9 +1,10 @@
-﻿import test from 'node:test';
+import test from 'node:test';
 import assert from 'node:assert/strict';
 import { mulberry32 } from '../rng.js';
 import { createWorld, type World, type Enemy } from '../world.js';
 import { movePlayer, moveEnemies, playerSpeed, PLAYER_RADIUS } from './movement.js';
 import { nearestEnemy, updateFacing, inArc, arcCosThreshold } from './targeting.js';
+import { updateWeapons } from './firing.js';
 
 function makeWorld(): World {
   return createWorld({ rng: mulberry32(1), startingWeaponId: 'club', weaponSlots: 6, maxHp: 60 });
@@ -146,4 +147,49 @@ test('扇形判定：90° 扇形正前方命中，正后方不命中', () => {
 test('扇形阈值：90° 半角对应 cos45°', () => {
   assert.ok(Math.abs(arcCosThreshold(90) - Math.SQRT1_2) < 1e-12);
   assert.ok(Math.abs(arcCosThreshold(180) - 0) < 1e-12);
+});
+
+test('起始武器在 100px 外即可命中 —— 射程修复行为验证', () => {
+  // 曾经 club 射程 70，命中距离 70+14=84，实测手感是"贴脸才打"。
+  // 现在 110，命中距离 124，100px 应能打到。
+  const w = makeWorld();
+  const e = addEnemy(w, w.player.x + 100, w.player.y);
+  const before = e.hp;
+  updateWeapons(w, 1 / 60);
+  assert.ok(e.hp < before, `100px 内的敌人应被命中，实际 hp ${e.hp}（原 ${before}）`);
+});
+
+test('超出射程的敌人打不到 —— 避免射程加大后变成全屏攻击', () => {
+  const w = makeWorld();
+  const e = addEnemy(w, w.player.x + 200, w.player.y);
+  const before = e.hp;
+  updateWeapons(w, 1 / 60);
+  assert.equal(e.hp, before, '200px 在射程 110+14=124 之外，不应命中');
+});
+
+test('射程边界：110px 内开火，115px 不开火', () => {
+  // 注意：开火条件是「有敌人落在 def.range 内」（firing.ts 的 nearestEnemy），
+  // 命中判定的 def.range + e.radius 只在已有目标时扩大扇形扫描范围。
+  const near = makeWorld();
+  const e1 = addEnemy(near, near.player.x + 105, near.player.y);
+  const b1 = e1.hp;
+  updateWeapons(near, 1 / 60);
+  assert.ok(e1.hp < b1, '105px 在射程 110 内，应命中');
+
+  const out = makeWorld();
+  const e2 = addEnemy(out, out.player.x + 115, out.player.y);
+  const b2 = e2.hp;
+  updateWeapons(out, 1 / 60);
+  assert.equal(e2.hp, b2, '115px 超出开火距离 110，不应命中');
+});
+
+test('已有目标时，扇形扫描会把稍远的敌人一起扫到（range + 敌人半径）', () => {
+  const w = makeWorld();
+  const trigger = addEnemy(w, w.player.x + 100, w.player.y); // 落在 110 内，负责触发开火
+  const splash = addEnemy(w, w.player.x + 120, w.player.y);  // 120 < 110+14，应被一起打到
+  const t0 = trigger.hp;
+  const s0 = splash.hp;
+  updateWeapons(w, 1 / 60);
+  assert.ok(trigger.hp < t0, '触发开火的敌人应被命中');
+  assert.ok(splash.hp < s0, `120px 在 110+14 内，应被一起扫到，实际 hp ${splash.hp}`);
 });

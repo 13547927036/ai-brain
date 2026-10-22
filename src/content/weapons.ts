@@ -1,4 +1,4 @@
-﻿import type { Quality, WeaponDef } from './types.js';
+import type { Quality, WeaponDef } from './types.js';
 
 export const QUALITY_DAMAGE_MUL: Record<Quality, number> = { 1: 1.0, 2: 1.35, 3: 1.8, 4: 2.4 };
 export const QUALITY_BASE_PRICE: Record<Quality, number> = { 1: 8, 2: 16, 3: 28, 4: 45 };
@@ -22,10 +22,10 @@ function w(seed: WeaponSeed): WeaponDef {
 }
 
 export const WEAPONS: WeaponDef[] = [
-  w({ id: 'club', name: '讨伐棒', kind: 'melee', damage: 6, cooldown: 0.8, range: 70, arcDeg: 90, hitRadius: 70, maxHits: 3, basePrice: 8 }),
-  w({ id: 'spear', name: '刺叉', kind: 'melee', damage: 5, cooldown: 0.7, range: 90, pierce: 2, hitRadius: 16, knockback: 0.5, basePrice: 8 }),
-  w({ id: 'greatsword', name: '海獭大剑', kind: 'melee', damage: 14, cooldown: 1.6, range: 80, arcDeg: 140, hitRadius: 80, knockback: 2.5, basePrice: 8 }),
-  w({ id: 'broom', name: '扫帚', kind: 'melee', damage: 3, cooldown: 0.35, range: 55, arcDeg: 70, hitRadius: 55, basePrice: 8 }),
+  w({ id: 'club', name: '讨伐棒', kind: 'melee', damage: 6, cooldown: 0.8, range: 110, arcDeg: 90, hitRadius: 110, maxHits: 3, basePrice: 8 }),
+  w({ id: 'spear', name: '刺叉', kind: 'melee', damage: 5, cooldown: 0.7, range: 130, pierce: 2, hitRadius: 16, knockback: 0.5, basePrice: 8 }),
+  w({ id: 'greatsword', name: '海獭大剑', kind: 'melee', damage: 14, cooldown: 1.6, range: 120, arcDeg: 140, hitRadius: 120, knockback: 2.5, basePrice: 8 }),
+  w({ id: 'broom', name: '扫帚', kind: 'melee', damage: 3, cooldown: 0.35, range: 95, arcDeg: 70, hitRadius: 95, basePrice: 8 }),
   w({ id: 'dualCannon', name: '双端火炮棍', kind: 'ranged', damage: 4, cooldown: 1.1, range: 300, shots: 2, spreadDeg: 24, projectileSpeed: 420, hitRadius: 10, basePrice: 8 }),
   w({ id: 'slingStone', name: '投石', kind: 'ranged', damage: 9, cooldown: 1.5, range: 260, projectileSpeed: 300, hitRadius: 40, basePrice: 8 }),
   w({ id: 'slingshot', name: '弹弓', kind: 'ranged', damage: 3, cooldown: 0.4, range: 280, projectileSpeed: 520, hitRadius: 8, basePrice: 8 }),

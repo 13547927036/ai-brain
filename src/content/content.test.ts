@@ -1,4 +1,4 @@
-﻿import test from 'node:test';
+import test from 'node:test';
 import assert from 'node:assert/strict';
 import { WEAPONS, QUALITY_DAMAGE_MUL, QUALITY_MIN_WAVE, SET_BONUS_PER_WEAPON } from './weapons.js';
 import { WAVES, WAVE_COUNT, TOTAL_WAVE_SECONDS, waveAt } from './waves.js';
@@ -16,7 +16,7 @@ test('武器数值与 spec 4.3 表一致', () => {
   const byId = Object.fromEntries(WEAPONS.map((w) => [w.id, w]));
   assert.deepEqual(
     [byId.club?.damage, byId.club?.cooldown, byId.club?.range],
-    [6, 0.8, 70],
+    [6, 0.8, 110],
   );
   assert.deepEqual(
     [byId.kunai?.damage, byId.kunai?.cooldown, byId.kunai?.range],
@@ -28,6 +28,22 @@ test('武器数值与 spec 4.3 表一致', () => {
   assert.equal(byId.broom?.cooldown, 0.35);
 });
 
+test('近战射程不得低于 90 —— 防止"贴脸打不到"的手感回归', () => {
+  // 自动开火的索敌半径就是 def.range（firing.ts），射程过短会让角色
+  // 站在敌人旁边不出手。曾经 club 只有 70，实际命中距离 70+14=84，
+  // 在 750 宽的场地上不足 12%，实测手感是"贴脸才打"。
+  const melee = WEAPONS.filter((w) => w.kind === 'melee');
+  assert.ok(melee.length > 0);
+  for (const w of melee) {
+    assert.ok(w.range >= 90, `${w.name} 射程 ${w.range} 过短，会贴脸才出手`);
+  }
+});
+
+test('起始武器射程够用 —— 开局不该贴脸', () => {
+  const club = WEAPONS.find((w) => w.id === 'club');
+  assert.ok(club, '起始武器 club 不存在');
+  assert.ok(club.range >= 100, `起始武器射程 ${club.range} 偏短`);
+});
 test('品质倍率与出现波次与 spec 一致', () => {
   assert.deepEqual(QUALITY_DAMAGE_MUL, { 1: 1.0, 2: 1.35, 3: 1.8, 4: 2.4 });
   assert.deepEqual(QUALITY_MIN_WAVE, { 1: 1, 2: 2, 3: 4, 4: 7 });
