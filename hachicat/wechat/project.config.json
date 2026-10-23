@@ -1,0 +1,12 @@
+{
+  "appid": "touristappid",
+  "projectname": "hachicat",
+  "compileType": "game",
+  "libVersion": "3.0.0",
+  "setting": {
+    "es6": true,
+    "minified": false,
+    "urlCheck": false,
+    "postcss": false
+  }
+}

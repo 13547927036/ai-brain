@@ -1,0 +1,104 @@
+/* =========================================================
+   设计令牌（Design Tokens）
+   换画风时优先改这里：颜色、圆角、字体、阴影。
+   ========================================================= */
+
+:root {
+  --font-ui: -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Hiragino Sans GB',
+    'Noto Sans SC', 'Microsoft YaHei', system-ui, sans-serif;
+  --font-display: 'PingFang SC', 'Hiragino Sans GB', 'Noto Sans SC', 'Microsoft YaHei',
+    system-ui, sans-serif;
+
+  --r-xs: 8px;
+  --r-sm: 12px;
+  --r-md: 18px;
+  --r-lg: 26px;
+
+  --sp-1: 4px;
+  --sp-2: 8px;
+  --sp-3: 12px;
+  --sp-4: 16px;
+  --sp-5: 22px;
+  --sp-6: 30px;
+
+  --tap: 48px;
+  --ease: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* ---------------- 霓虹夜巷（默认） ---------------- */
+html[data-theme='neon'] {
+  --page-bg: #05060d;
+  --bg: #080a14;
+  --bg-2: #0e1324;
+  --panel: rgba(15, 21, 38, 0.88);
+  --panel-2: rgba(26, 35, 60, 0.9);
+  --panel-3: rgba(38, 50, 82, 0.72);
+  --text: #e9efff;
+  --text-dim: #a7b6d9;
+  --muted: #7f90b8;
+  --line: rgba(120, 160, 255, 0.16);
+  --line-strong: rgba(120, 160, 255, 0.32);
+  --accent: #67e8f9;
+  --accent-deep: #2196b5;
+  --accent-soft: rgba(103, 232, 249, 0.14);
+  --accent-2: #f9a826;
+  --accent-2-soft: rgba(249, 168, 38, 0.16);
+  --danger: #ff5c7a;
+  --danger-soft: rgba(255, 92, 122, 0.16);
+  --good: #7ee787;
+  --coin: #ffce54;
+  --on-accent: #04131a;
+  --shadow: 0 18px 40px rgba(0, 0, 0, 0.55);
+  --shadow-soft: 0 8px 22px rgba(0, 0, 0, 0.35);
+  --glow: 0 0 24px rgba(103, 232, 249, 0.25);
+  --bar-back: rgba(6, 10, 22, 0.75);
+  --stage-ring: 0 0 0 1px var(--line);
+  --card-grad: linear-gradient(180deg, rgba(34, 46, 78, 0.95), rgba(18, 25, 45, 0.95));
+  --sheen: linear-gradient(180deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0));
+  color-scheme: dark;
+}
+
+/* ---------------- 纸片白日 ---------------- */
+html[data-theme='paper'] {
+  --page-bg: #e8d8bd;
+  --bg: #fbf3e4;
+  --bg-2: #f4e6cf;
+  --panel: #fffaf0;
+  --panel-2: #f8ecd8;
+  --panel-3: #efddc2;
+  --text: #2b2018;
+  --text-dim: #5c4a38;
+  --muted: #97836a;
+  --line: rgba(80, 55, 30, 0.18);
+  --line-strong: rgba(80, 55, 30, 0.38);
+  --accent: #2f7f74;
+  --accent-deep: #1f6158;
+  --accent-soft: rgba(47, 127, 116, 0.12);
+  --accent-2: #d98032;
+  --accent-2-soft: rgba(217, 128, 50, 0.16);
+  --danger: #c2452f;
+  --danger-soft: rgba(194, 69, 47, 0.14);
+  --good: #2f855a;
+  --coin: #b07d12;
+  --on-accent: #fffaf0;
+  --shadow: 0 6px 0 rgba(80, 55, 30, 0.85);
+  --shadow-soft: 0 4px 0 rgba(80, 55, 30, 0.75);
+  --glow: none;
+  --bar-back: rgba(80, 55, 30, 0.14);
+  --stage-ring: 0 0 0 2px rgba(80, 55, 30, 0.35);
+  --card-grad: linear-gradient(180deg, #fffdf7, #f6e9d4);
+  --sheen: linear-gradient(180deg, rgba(255, 255, 255, 0.6), rgba(255, 255, 255, 0));
+  color-scheme: light;
+}
+
+/* 稀有度颜色 */
+html[data-theme='neon'] {
+  --r1: #93a6cf;
+  --r2: #b18cff;
+  --r3: #ffc247;
+}
+html[data-theme='paper'] {
+  --r1: #8b7b66;
+  --r2: #7b5ea7;
+  --r3: #c4830f;
+}

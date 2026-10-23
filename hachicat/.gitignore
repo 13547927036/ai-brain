@@ -1,0 +1,9 @@
+﻿node_modules/
+dist/
+wechat-dist/
+screenshots/
+.vite/
+*.log
+test-results/
+.tmp/
+.wrangler/
