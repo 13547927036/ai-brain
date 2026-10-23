@@ -1,5 +1,5 @@
-﻿import { UPGRADES, RARITY_WEIGHT } from '../content/upgrades.js';
-import { WEAPONS, weaponPrice } from '../content/weapons.js';
+import { UPGRADES, RARITY_WEIGHT } from '../content/upgrades.js';
+import { WEAPONS, weaponPrice, WEAPON_COPY_CHANCE, WEAPON_COPY_PRICE_RATIO } from '../content/weapons.js';
 import { ITEMS, ITEM_BY_ID } from '../content/items.js';
 import { MAX_WEAPONS, MAX_WEAPON_LEVEL } from './constants.js';
 import { recomputePlayerStats } from './stats.js';
@@ -37,6 +37,34 @@ export function applyUpgrade(player, upgrade) {
   recomputePlayerStats(player);
 }
 
+/** 是否还有空武器槽（首次购买与副本都受此限制）。 */
+export function hasFreeWeaponSlot(player) {
+  return player.weapons.length < MAX_WEAPONS;
+}
+
+/** 造一件武器实例。数值一律由 id + level 派生，不在这里固化。 */
+function makeWeapon(weaponId, level = 1) {
+  return {
+    id: weaponId,
+    level: Math.max(1, Math.min(MAX_WEAPON_LEVEL, level)),
+    cd: 0,
+    state: { spin: 0, hits: new Map() },
+  };
+}
+
+/** 直购价：拿下 offerLevel 级的这件武器要多少钱。 */
+export function weaponOfferPrice(weaponId, offerLevel) {
+  const def = getWeapon(weaponId);
+  if (!def) return 0;
+  return Math.round(weaponPrice(def) * (1 + 0.3 * (offerLevel - 1)));
+}
+
+/** 副本单价：level 级副本的价钱，恒低于「升到 level+1」的直购价的一半。 */
+export function weaponCopyPrice(weaponId, level) {
+  const direct = weaponOfferPrice(weaponId, level + 1);
+  return Math.max(1, Math.round(direct * WEAPON_COPY_PRICE_RATIO));
+}
+
 export function canEquipWeapon(player, weaponId) {
   const owned = player.weapons.find((w) => w.id === weaponId);
   if (owned) return owned.level < MAX_WEAPON_LEVEL;
@@ -54,8 +82,21 @@ export function addWeapon(player, weaponId) {
     return { type: 'upgrade', level: owned.level };
   }
   if (player.weapons.length >= MAX_WEAPONS) return null;
-  player.weapons.push({ id: weaponId, level: 1, cd: 0, state: { spin: 0, hits: new Map() } });
+  player.weapons.push(makeWeapon(weaponId, 1));
   return { type: 'new', level: 1 };
+}
+
+/**
+ * 复制一件已有武器（商店副本）：占一个空槽，等级与原武器相同，不动原武器。
+ * 返回 { type, id, level }，没有空槽或武器不存在时返回 null。
+ */
+export function addWeaponCopy(player, weaponId, level) {
+  const def = getWeapon(weaponId);
+  if (!def) return null;
+  if (!hasFreeWeaponSlot(player)) return null;
+  player.weapons.push(makeWeapon(weaponId, level));
+  const added = player.weapons[player.weapons.length - 1];
+  return { type: 'copy', id: weaponId, level: added.level };
 }
 
 /** 列出可合成的武器：同 id 且同等级成对，且未满级。 */
@@ -98,7 +139,27 @@ export function generateShop(player, rng, wave) {
 
   const weaponCandidates = Object.values(WEAPONS).filter((w) => canEquipWeapon(player, w.id));
   const pickedWeapons = new Set();
+  // 同级副本候选：已拥有、未满级，且有空槽放副本
+  const copyCandidates = hasFreeWeaponSlot(player)
+    ? player.weapons.filter((w) => w.level < MAX_WEAPON_LEVEL)
+    : [];
   for (let i = 0; i < 2; i++) {
+    // 这一格改成同级副本：按概率出现，替代直购位，不增加商品总数
+    if (copyCandidates.length && rng.chance(WEAPON_COPY_CHANCE)) {
+      const pick = rng.pick(copyCandidates);
+      if (pick) {
+        offers.push({
+          key: `c:${pick.id}:${i}`,
+          type: 'weapon',
+          copy: true,
+          weaponId: pick.id,
+          level: pick.level,
+          price: weaponCopyPrice(pick.id, pick.level),
+          sold: false,
+        });
+        continue;
+      }
+    }
     const entries = weaponCandidates
       .filter((w) => !pickedWeapons.has(w.id))
       .map((w) => ({ value: w, weight: rarityWeight(w.rarity, wave) }));
@@ -147,6 +208,13 @@ export function buyOffer(player, shop, index) {
   if (player.money < offer.price) return { ok: false, reason: 'money' };
 
   if (offer.type === 'weapon') {
+    if (offer.copy) {
+      const copied = addWeaponCopy(player, offer.weaponId, offer.level);
+      if (!copied) return { ok: false, reason: 'slots' };
+      player.money -= offer.price;
+      offer.sold = true;
+      return { ok: true, type: 'weapon', ...copied };
+    }
     if (!canEquipWeapon(player, offer.weaponId)) return { ok: false, reason: 'slots' };
     const applied = addWeapon(player, offer.weaponId);
     if (!applied) return { ok: false, reason: 'slots' };
@@ -188,4 +256,4 @@ export function buyHeal(player, shop) {
   if (player.hp >= player.stats.maxHp) return { ok: false, reason: 'full', price };
   player.money -= price;
   return { ok: true, price, amount: Math.round(player.stats.maxHp * 0.38) };
-}// probe-write-test
+}

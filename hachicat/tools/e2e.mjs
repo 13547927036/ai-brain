@@ -241,40 +241,72 @@ check('商店 4 个商品', shop.shop?.offers.length === 4, `offers=${shop.shop?
 const buildTitle = await page.locator('.shop__build h3').innerText();
 check('商店展示武器槽位', buildTitle.includes('/6'), buildTitle);
 
-// 合成：补一件同名武器后，商店应出现合成入口
-await page.evaluate(() => window.__hachicat.addWeapon('hairball'));
+// 合成：走真实商店流程——刷出同名副本 → 买下 → 合成升一级
+await page.evaluate(() => window.__hachicat.money(9999));
+await page.waitForTimeout(200);
+let copyIndex = -1;
+for (let attempt = 0; attempt < 12 && copyIndex < 0; attempt++) {
+  const snap = await page.evaluate(() => window.__hachicat.state());
+  copyIndex = (snap.shop?.offers || []).findIndex((o) => o.copy === true);
+  if (copyIndex < 0) {
+    await page.locator('[data-testid="reroll"]').click();
+    await page.waitForTimeout(200);
+  }
+}
+const shopSnap = await page.evaluate(() => window.__hachicat.state());
+const copyOffer = copyIndex >= 0 ? shopSnap.shop.offers[copyIndex] : null;
+check('商店能刷出同名同等级副本', copyOffer?.copy === true, 'copyIndex=' + copyIndex);
+check('副本标记为可用于合成', (copyOffer?.tag || '').includes('副本'), copyOffer?.tag);
+
+const weaponsBeforeCopy = shopSnap.weapons.length;
+const moneyBeforeCopy = shopSnap.money;
+await page.locator('[data-testid="buy-' + copyIndex + '"]').click();
 await page.waitForTimeout(250);
-const synthBtn = page.locator('[data-testid="synthesize-hairball"]');
+const afterCopy = await page.evaluate(() => window.__hachicat.state());
+check(
+  '买下副本后多一件同名同等级武器',
+  afterCopy.weapons.filter((w) => w.id === copyOffer.weaponId && w.level === copyOffer.level).length >= 2,
+  JSON.stringify(afterCopy.weapons)
+);
+check(
+  '买副本按副本价扣款',
+  afterCopy.money === moneyBeforeCopy - copyOffer.price,
+  'money=' + afterCopy.money + ' before=' + moneyBeforeCopy + ' price=' + copyOffer.price
+);
+
+const synthBtn = page.locator('[data-testid="synthesize-' + copyOffer.weaponId + '"]');
 check('商店出现武器合成入口', await synthBtn.isVisible());
 await synthBtn.click();
 await page.waitForTimeout(250);
 const afterSynth = await page.evaluate(() => window.__hachicat.state());
+const merged = afterSynth.weapons.find((w) => w.id === copyOffer.weaponId);
+check('合成后武器等级 +1', merged?.level === copyOffer.level + 1, JSON.stringify(afterSynth.weapons));
 check(
-  '合成后武器等级 +1',
-  afterSynth.weapons.find((w) => w.id === 'hairball')?.level === 2,
+  '合成只保留一件并释放槽位',
+  afterSynth.weapons.filter((w) => w.id === copyOffer.weaponId).length === 1 &&
+    afterSynth.weapons.length === weaponsBeforeCopy,
   JSON.stringify(afterSynth.weapons)
 );
-check(
-  '合成消耗一件武器',
-  afterSynth.weapons.filter((w) => w.id === 'hairball').length === 1,
-  JSON.stringify(afterSynth.weapons)
-);
+const buildAfter = await page.locator('.shop__build h3').innerText();
+check('槽位显示回到合成前', buildAfter.includes(weaponsBeforeCopy + '/6'), buildAfter);
 
 await page.evaluate(() => window.__hachicat.money(200));
 await page.waitForTimeout(250);
-const shotMoney = (await page.evaluate(() => window.__hachicat.state())).money;
-const moneyBeforeBuy = shotMoney;
-const offer0 = page.locator('[data-testid="buy-0"]');
-const price0 = Number((await offer0.locator('.offer__price').innerText()).replace(/\D/g, ''));
-await offer0.click();
+const preBuy = await page.evaluate(() => window.__hachicat.state());
+const moneyBeforeBuy = preBuy.money;
+const buyIndex = preBuy.shop.offers.findIndex((o) => !o.sold && o.canBuy);
+check('商店存在可购买商品', buyIndex >= 0, 'buyIndex=' + buyIndex);
+const buyBtn = page.locator('[data-testid="buy-' + buyIndex + '"]');
+const price0 = Number((await buyBtn.locator('.offer__price').innerText()).replace(/\D/g, ''));
+await buyBtn.click();
 await page.waitForTimeout(250);
 const afterBuy = await page.evaluate(() => window.__hachicat.state());
 check(
   '购买后扣款',
   afterBuy.money === moneyBeforeBuy - price0,
-  `money=${afterBuy.money}, before=${moneyBeforeBuy}, price=${price0}`
+  'money=' + afterBuy.money + ' before=' + moneyBeforeBuy + ' price=' + price0
 );
-check('购买后商品标记已购', afterBuy.shop.offers[0].sold === true);
+check('购买后商品标记已购', afterBuy.shop.offers[buyIndex].sold === true);
 await shot('08-shop-bought');
 
 const hpBeforeHeal = 20;

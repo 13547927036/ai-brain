@@ -25,6 +25,7 @@ import {
   buyHeal,
   healPrice,
   canEquipWeapon,
+  hasFreeWeaponSlot,
   synthesizeWeapon,
   listSynthesis,
 } from './progression.js';
@@ -472,10 +473,14 @@ export class Game {
     const p = this.world.player;
     if (offer.type === 'weapon') {
       const def = getWeapon(offer.weaponId);
+      const copy = !!offer.copy;
+      const blocked = copy ? !hasFreeWeaponSlot(p) : !canEquipWeapon(p, offer.weaponId);
       return {
         index,
         key: offer.key,
         type: 'weapon',
+        copy,
+        weaponId: offer.weaponId,
         name: def?.name || offer.weaponId,
         level: offer.level,
         rarity: def?.rarity || 1,
@@ -483,9 +488,13 @@ export class Game {
         sold: offer.sold,
         desc: def?.desc || '',
         icon: WEAPON_ICONS[offer.weaponId] || 'icon.paw',
-        tag: offer.level > 1 ? `升级至 Lv.${offer.level}` : '新武器',
-        canBuy: !offer.sold && p.money >= offer.price && canEquipWeapon(p, offer.weaponId),
-        reason: !canEquipWeapon(p, offer.weaponId) ? '武器栏已满' : '',
+        tag: copy
+          ? `副本 Lv.${offer.level} · 可合成`
+          : offer.level > 1
+            ? `升级至 Lv.${offer.level}`
+            : '新武器',
+        canBuy: !offer.sold && p.money >= offer.price && !blocked,
+        reason: blocked ? '武器栏已满' : '',
       };
     }
     const item = ITEM_BY_ID[offer.itemId];
