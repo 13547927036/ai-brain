@@ -25,6 +25,8 @@ import {
   buyHeal,
   healPrice,
   canEquipWeapon,
+  synthesizeWeapon,
+  listSynthesis,
 } from './progression.js';
 
 /**

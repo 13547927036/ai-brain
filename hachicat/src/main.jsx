@@ -29,6 +29,10 @@ if (import.meta.env.DEV || location.search.includes('debug=1')) {
       controller.game.debugMoney(n);
       controller.publish();
     },
+    addWeapon: (id, level = 1) => {
+      controller.game.debugAddWeapon(id, level);
+      controller.publish();
+    },
     heal: () => {
       controller.game.debugHeal();
       controller.publish();

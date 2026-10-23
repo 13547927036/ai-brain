@@ -279,6 +279,12 @@ export class GameController {
     return res;
   }
 
+  synthesize(weaponId) {
+    const res = this.game.synthesize(weaponId);
+    if (res.ok) this.publish();
+    return res;
+  }
+
   nextWave() {
     const ok = this.game.nextWave();
     this.lastMode = '';

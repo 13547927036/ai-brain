@@ -69,8 +69,8 @@ export default function Hud({ snap, controller }) {
       )}
 
       <div className="hud__weapons">
-        {snap.weapons.map((w) => (
-          <div key={w.id} className="weapon-chip" title={`${w.name} Lv.${w.level}`}>
+        {snap.weapons.map((w, i) => (
+          <div key={`${w.id}-${i}`} className="weapon-chip" title={`${w.name} Lv.${w.level}`}>
             <SpriteIcon spriteId={w.icon} size={26} themeId={snap.themeId} />
             <span className="weapon-chip__lv">{w.level}</span>
           </div>

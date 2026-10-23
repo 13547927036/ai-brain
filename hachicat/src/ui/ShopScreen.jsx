@@ -64,8 +64,8 @@ export default function ShopScreen({ controller, snap }) {
         <section className="shop__build">
           <h3>当前装备 · {snap.weapons.length}/{MAX_WEAPONS} 槽</h3>
           <div className="shop__weapons">
-            {snap.weapons.map((w) => (
-              <span className="build-weapon" key={w.id}>
+            {snap.weapons.map((w, i) => (
+              <span className="build-weapon" key={`${w.id}-${i}`}>
                 <SpriteIcon spriteId={w.icon} size={18} themeId={snap.themeId} />
                 {w.name}
                 <b>Lv.{w.level}</b>
