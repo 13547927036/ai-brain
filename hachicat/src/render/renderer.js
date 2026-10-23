@@ -10,6 +10,42 @@ export function createRenderer(canvas) {
   let width = 0;
   let height = 0;
   let dpr = 1;
+
+/**
+ * 玩家移动 / 待机动画状态（模块级，逐帧零分配）。
+ *
+ * 立绘是完整单张 PNG，没有四肢图层，所以只做整体起伏、左右摆动与前倾，
+ * 不做腿部交替、也不缩放，避免破坏立绘比例。
+ * 时间取世界时间差：暂停时世界时间不推进，动画自然冻结；重开时世界时间回退，状态归零。
+ */
+const playAnim = { lastT: -1, phase: 0, move: 0, bob: 0, sway: 0, lean: 0, tilt: 0 };
+
+function updatePlayerAnim(t, p) {
+  let dt = 0;
+  if (playAnim.lastT >= 0 && t >= playAnim.lastT) dt = Math.min(0.05, t - playAnim.lastT);
+  if (t < playAnim.lastT) {
+    playAnim.phase = 0;
+    playAnim.move = 0;
+  }
+  playAnim.lastT = t;
+
+  // 移动量平滑过渡：松开摇杆不是硬切，而是在几百毫秒内收回待机
+  const len = Math.min(1, Math.hypot(p.moveX || 0, p.moveY || 0));
+  const target = p.moving ? Math.max(0.4, len) : 0;
+  playAnim.move += (target - playAnim.move) * (1 - Math.exp(-dt * 9));
+
+  // 节奏随实际移速变化；三个角色按各自基础移速得到轻微不同的步频
+  const speed = (p.stats && p.stats.speed) || 170;
+  const speedFactor = Math.min(1.3, Math.max(0.8, speed / 170));
+  playAnim.phase += dt * (3.4 + playAnim.move * 13 * speedFactor);
+
+  const m = playAnim.move;
+  const ph = playAnim.phase;
+  playAnim.bob = Math.sin(ph) * (0.75 + m * 1.35);
+  playAnim.sway = Math.sin(ph * 0.5) * (0.004 + m * 0.012);
+  playAnim.tilt = Math.sin(ph) * (0.004 + m * 0.03);
+  playAnim.lean = ((p.moveX || 0) >= 0 ? 1 : -1) * m * 0.05;
+}
   let props = [];
   let propsFor = '';
   let bgGradient = null;
@@ -138,13 +174,16 @@ export function createRenderer(canvas) {
 
       const blink = p.invuln > 0 && Math.floor(p.invuln * 14) % 2 === 0;
       if (!blink) {
+        updatePlayerAnim(t, p);
         drawSprite(ctx, p.sprite, p.x, p.y, {
           theme,
           t,
           size: 46,
           facing: p.facing,
-          bob: p.moving ? Math.sin(t * 13) * 1.8 : Math.sin(t * 3) * 0.8,
-          tilt: p.moving ? Math.sin(t * 13) * 0.05 : 0,
+          bob: playAnim.bob,
+          tilt: playAnim.tilt,
+          sway: playAnim.sway,
+          lean: playAnim.lean,
           flash: p.flash,
         });
       }

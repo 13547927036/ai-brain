@@ -819,11 +819,12 @@ function drawCharImage(ctx, x, y, size, sprite, opts) {
   const w = (img.width || IMAGE_CONTENT_W) * k;
   const h = (img.height || IMAGE_CONTENT_W) * k;
   const bob = opts.bob ?? 0;
-  const tilt = opts.tilt ?? 0;
+  // 旋转只做整体姿态：摆动 + 前倾 + 起伏微倾，不做缩放，保持立绘比例
+  const rot = (opts.tilt ?? 0) * 0.3 + (opts.sway ?? 0) + (opts.lean ?? 0);
 
   ctx.save();
   ctx.translate(x, y + bob * 0.6);
-  if (tilt) ctx.rotate(tilt * 0.3);
+  if (rot) ctx.rotate(rot);
   ctx.imageSmoothingEnabled = true;
   if ('imageSmoothingQuality' in ctx) ctx.imageSmoothingQuality = 'high';
   ctx.drawImage(img, -w / 2, size * IMAGE_FOOT_RATIO - h, w, h);
