@@ -444,6 +444,380 @@ function drawBrute(ctx, x, y, size, p, t) {
   ctx.restore();
 }
 
+/* ---------------- 敌人：疾走快递 ---------------- */
+
+function drawDart(ctx, x, y, size, p, t, opts = {}) {
+  const s = size / 30;
+  ctx.save();
+  ctx.translate(x, y);
+  ctx.scale(s, s);
+  shadow(ctx, 0, 12, 11, 4, 'rgba(0,0,0,0.3)');
+
+  // 轮子
+  ctx.fillStyle = p.wheel;
+  ellipse(ctx, -7, 10, 4, 3.4);
+  ctx.fill();
+  ellipse(ctx, 7, 10, 4, 3.4);
+  ctx.fill();
+
+  // 车斗 / 包裹
+  ctx.fillStyle = p.bodyDark;
+  rr(ctx, -12, -8, 20, 17, 6);
+  ctx.fill();
+  ctx.fillStyle = p.body;
+  rr(ctx, -10, -6, 17, 13, 5);
+  ctx.fill();
+
+  // 车头整流罩
+  ctx.fillStyle = p.body;
+  triangle(ctx, 7, -7, 17, 1, 7, 9);
+  ctx.fill();
+  ctx.fillStyle = p.glow;
+  ctx.globalAlpha = 0.7 + Math.sin(t * 10) * 0.25;
+  ctx.beginPath();
+  ctx.arc(15, 1, 2.4, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.globalAlpha = 1;
+
+  // 尾灯 / 推进器
+  const push = 0.6 + Math.sin(t * 14) * 0.4;
+  ctx.fillStyle = p.glow;
+  ctx.globalAlpha = 0.5 + push * 0.4;
+  triangle(ctx, -12, -3, -20 - push * 4, 1, -12, 5);
+  ctx.fill();
+  ctx.globalAlpha = 1;
+
+  // 眼睛
+  ctx.fillStyle = p.eye;
+  ellipse(ctx, 3, -2, 3, 2.4);
+  ctx.fill();
+  ctx.fillStyle = '#fff';
+  ellipse(ctx, 4, -2.8, 1, 0.9);
+  ctx.fill();
+
+  ctx.restore();
+}
+
+/* ---------------- 敌人：铁皮箱 ---------------- */
+
+function drawGuard(ctx, x, y, size, p, t) {
+  const s = size / 46;
+  ctx.save();
+  ctx.translate(x, y + Math.sin(t * 3) * 0.6);
+  ctx.scale(s, s);
+  shadow(ctx, 0, 21, 17, 6, 'rgba(0,0,0,0.34)');
+
+  // 箱体
+  ctx.fillStyle = p.bodyDark;
+  rr(ctx, -14, -17, 30, 34, 7);
+  ctx.fill();
+  ctx.fillStyle = p.body;
+  rr(ctx, -12, -15, 26, 30, 6);
+  ctx.fill();
+
+  // 正面铁皮护盾
+  ctx.fillStyle = p.plate;
+  rr(ctx, -22, -13, 15, 27, 5);
+  ctx.fill();
+  ctx.strokeStyle = p.rivet;
+  ctx.lineWidth = 1.8;
+  ctx.globalAlpha = 0.8;
+  ctx.strokeRect(-20, -11, 11, 23);
+  ctx.globalAlpha = 1;
+
+  // 铆钉
+  ctx.fillStyle = p.rivet;
+  for (const ry of [-8, 0, 8]) {
+    ctx.beginPath();
+    ctx.arc(-14.5, ry, 1.5, 0, Math.PI * 2);
+    ctx.fill();
+  }
+
+  // 箱体横纹
+  ctx.strokeStyle = p.bodyDark;
+  ctx.lineWidth = 1.4;
+  ctx.globalAlpha = 0.7;
+  for (const gy of [-6, 3, 12]) {
+    ctx.beginPath();
+    ctx.moveTo(-9, gy);
+    ctx.lineTo(12, gy);
+    ctx.stroke();
+  }
+  ctx.globalAlpha = 1;
+
+  // 观察口
+  ctx.fillStyle = p.eye;
+  ctx.globalAlpha = 0.85 + Math.sin(t * 4) * 0.1;
+  rr(ctx, 1, -9, 9, 4, 2);
+  ctx.fill();
+  ctx.globalAlpha = 1;
+
+  // 腿
+  ctx.fillStyle = p.bodyDark;
+  rr(ctx, -9, 16, 7, 5, 2);
+  ctx.fill();
+  rr(ctx, 4, 16, 7, 5, 2);
+  ctx.fill();
+
+  ctx.restore();
+}
+
+/* ---------------- 敌人：漏电电池 ---------------- */
+
+function drawBomber(ctx, x, y, size, p, t, opts = {}) {
+  const s = size / 30;
+  const fuse = Math.max(0, Math.min(1, opts.fuse || 0));
+  ctx.save();
+  ctx.translate(x, y + Math.sin(t * 8) * 0.8);
+  ctx.scale(s, s);
+  shadow(ctx, 0, 14, 9, 3.4, 'rgba(0,0,0,0.3)');
+
+  // 电池外壳
+  ctx.fillStyle = p.bodyDark;
+  rr(ctx, -10, -12, 20, 28, 6);
+  ctx.fill();
+  ctx.fillStyle = p.body;
+  rr(ctx, -8, -10, 16, 24, 5);
+  ctx.fill();
+
+  // 警示条纹
+  ctx.fillStyle = p.stripe;
+  ctx.globalAlpha = 0.8;
+  for (let i = 0; i < 3; i++) {
+    ctx.beginPath();
+    ctx.moveTo(-8, 0 + i * 6);
+    ctx.lineTo(8, 3 + i * 6);
+    ctx.lineTo(8, 5.5 + i * 6);
+    ctx.lineTo(-8, 2.5 + i * 6);
+    ctx.closePath();
+    ctx.fill();
+  }
+  ctx.globalAlpha = 1;
+
+  // 正负极
+  ctx.fillStyle = p.spark;
+  rr(ctx, -6, -16, 4, 4, 1.5);
+  ctx.fill();
+  rr(ctx, 3, -16, 4, 4, 1.5);
+  ctx.fill();
+  rr(ctx, -1.5, -14, 3, 6, 1.5);
+  ctx.fill();
+
+  // 电量核心
+  const blink = fuse > 0 ? 0.35 + Math.abs(Math.sin(t * 24)) * 0.65 : 0.45 + Math.sin(t * 5) * 0.2;
+  ctx.fillStyle = p.core;
+  ctx.globalAlpha = blink;
+  ellipse(ctx, 0, 6, 5.5, 4.5);
+  ctx.fill();
+  ctx.globalAlpha = 1;
+  ctx.strokeStyle = p.spark;
+  ctx.lineWidth = 1.4;
+  ctx.beginPath();
+  ctx.moveTo(1.5, 1);
+  ctx.lineTo(-2, 5.5);
+  ctx.lineTo(1, 5.5);
+  ctx.lineTo(-1, 11);
+  ctx.stroke();
+
+  // 引信火花
+  if (fuse > 0) {
+    ctx.fillStyle = p.spark;
+    for (let i = 0; i < 3; i++) {
+      const a = t * 20 + i * 2.1;
+      ctx.beginPath();
+      ctx.arc(Math.cos(a) * 6, -18 + Math.sin(a) * 2, 1.2, 0, Math.PI * 2);
+      ctx.fill();
+    }
+  }
+
+  ctx.restore();
+}
+
+/* ---------------- 敌人：孵化箱 ---------------- */
+
+function drawBrood(ctx, x, y, size, p, t) {
+  const s = size / 42;
+  ctx.save();
+  ctx.translate(x, y + Math.sin(t * 2.4) * 0.8);
+  ctx.scale(s, s);
+  shadow(ctx, 0, 20, 16, 5.6, 'rgba(0,0,0,0.34)');
+
+  // 底座
+  ctx.fillStyle = p.bodyDark;
+  rr(ctx, -17, 4, 34, 17, 6);
+  ctx.fill();
+  ctx.fillStyle = p.body;
+  rr(ctx, -15, 6, 30, 13, 5);
+  ctx.fill();
+
+  // 玻璃罩
+  ctx.fillStyle = p.glass;
+  ctx.globalAlpha = 0.28;
+  ellipse(ctx, 0, -7, 15, 14);
+  ctx.fill();
+  ctx.globalAlpha = 1;
+  ctx.strokeStyle = p.glass;
+  ctx.lineWidth = 2;
+  ctx.globalAlpha = 0.8;
+  ellipse(ctx, 0, -7, 15, 14);
+  ctx.stroke();
+  ctx.globalAlpha = 1;
+
+  // 里面的蛋
+  ctx.fillStyle = p.egg;
+  for (let i = 0; i < 3; i++) {
+    const a = t * 1.4 + i * 2.1;
+    ellipse(ctx, Math.cos(a) * 6, -6 + Math.sin(a) * 4, 3.2, 4.2, a * 0.3);
+    ctx.fill();
+  }
+
+  // 顶部喷口
+  ctx.fillStyle = p.bodyDark;
+  rr(ctx, -4, -21, 8, 7, 3);
+  ctx.fill();
+  ctx.fillStyle = p.eye;
+  ctx.globalAlpha = 0.6 + Math.sin(t * 6) * 0.3;
+  ctx.beginPath();
+  ctx.arc(0, -22, 2.2, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.globalAlpha = 1;
+
+  // 触须
+  ctx.strokeStyle = p.bodyDark;
+  ctx.lineWidth = 2;
+  ctx.lineCap = 'round';
+  for (const dir of [-1, 1]) {
+    ctx.beginPath();
+    ctx.moveTo(dir * 14, 10);
+    ctx.quadraticCurveTo(dir * 22, 16, dir * 20, 22 + Math.sin(t * 4 + dir) * 2);
+    ctx.stroke();
+  }
+
+  // 状态灯
+  ctx.fillStyle = p.eye;
+  ctx.globalAlpha = Math.sin(t * 7) > 0 ? 0.9 : 0.2;
+  rr(ctx, -10, 13, 4, 2.5, 1);
+  ctx.fill();
+  ctx.globalAlpha = 1;
+
+  ctx.restore();
+}
+
+/* ---------------- 敌人：维修灯 ---------------- */
+
+function drawMender(ctx, x, y, size, p, t) {
+  const s = size / 34;
+  ctx.save();
+  ctx.translate(x, y + Math.sin(t * 4) * 0.7);
+  ctx.scale(s, s);
+  shadow(ctx, 0, 16, 12, 4.4, 'rgba(0,0,0,0.3)');
+
+  // 底盘
+  ctx.fillStyle = p.bodyDark;
+  rr(ctx, -11, 8, 22, 8, 4);
+  ctx.fill();
+  ctx.fillStyle = p.body;
+  rr(ctx, -9, 10, 18, 5, 2.5);
+  ctx.fill();
+
+  // 灯杆
+  ctx.strokeStyle = p.bodyDark;
+  ctx.lineWidth = 3;
+  ctx.beginPath();
+  ctx.moveTo(0, 9);
+  ctx.quadraticCurveTo(2, -4, 7, -10);
+  ctx.stroke();
+
+  // 灯头
+  ctx.fillStyle = p.body;
+  ctx.save();
+  ctx.translate(8, -11);
+  ctx.rotate(0.35);
+  rr(ctx, -7, -6, 14, 11, 4);
+  ctx.fill();
+  ctx.fillStyle = p.light;
+  ctx.globalAlpha = 0.75 + Math.sin(t * 5) * 0.2;
+  rr(ctx, -4, -3, 9, 5, 2);
+  ctx.fill();
+  ctx.globalAlpha = 1;
+  ctx.restore();
+
+  // 治疗十字
+  ctx.fillStyle = p.cross;
+  rr(ctx, -7, -1, 7, 2.4, 1);
+  ctx.fill();
+  rr(ctx, -4.8, -3.2, 2.4, 6.4, 1);
+  ctx.fill();
+
+  // 眼睛
+  ctx.fillStyle = p.eye;
+  ellipse(ctx, -3, 4, 2.4, 2);
+  ctx.fill();
+  ellipse(ctx, 3, 4, 2.4, 2);
+  ctx.fill();
+
+  // 修复光
+  ctx.strokeStyle = p.light;
+  ctx.globalAlpha = 0.3;
+  ctx.lineWidth = 1.6;
+  ellipse(ctx, 0, 0, 18 + Math.sin(t * 3) * 2, 18 + Math.sin(t * 3) * 2);
+  ctx.stroke();
+  ctx.globalAlpha = 1;
+
+  ctx.restore();
+}
+
+/* ---------------- 召唤物：螺丝崽 ---------------- */
+
+function drawMite(ctx, x, y, size, p, t) {
+  const s = size / 18;
+  ctx.save();
+  ctx.translate(x, y + Math.sin(t * 10) * 1);
+  ctx.scale(s, s);
+  shadow(ctx, 0, 7, 6, 2.4, 'rgba(0,0,0,0.28)');
+
+  // 腿
+  ctx.strokeStyle = p.bodyDark;
+  ctx.lineWidth = 1.6;
+  ctx.lineCap = 'round';
+  for (const dir of [-1, 1]) {
+    for (let i = 0; i < 2; i++) {
+      ctx.beginPath();
+      ctx.moveTo(dir * 4, 3 + i * 3);
+      ctx.lineTo(dir * 8, 7 + i * 3 + Math.sin(t * 14 + i) * 0.8);
+      ctx.stroke();
+    }
+  }
+
+  // 螺丝头
+  ctx.fillStyle = p.body;
+  ctx.beginPath();
+  ctx.arc(0, 0, 6, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.strokeStyle = p.bodyDark;
+  ctx.lineWidth = 1.6;
+  ctx.beginPath();
+  ctx.moveTo(-3.4, 0);
+  ctx.lineTo(3.4, 0);
+  ctx.stroke();
+
+  // 眼睛
+  ctx.fillStyle = p.eye;
+  ctx.beginPath();
+  ctx.arc(2, -2, 1.4, 0, Math.PI * 2);
+  ctx.fill();
+
+  // 火花
+  ctx.fillStyle = p.spark;
+  ctx.globalAlpha = 0.5 + Math.sin(t * 9) * 0.3;
+  ctx.beginPath();
+  ctx.arc(0, -7, 1.1, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.globalAlpha = 1;
+
+  ctx.restore();
+}
+
 /* ---------------- Boss：铁肺 ---------------- */
 
 function drawBoss(ctx, x, y, size, p, t, phase = 1) {
@@ -737,6 +1111,18 @@ export function drawSprite(ctx, spriteId, x, y, opts = {}) {
       return drawSpitter(ctx, x, y, size, p, t);
     case 'brute':
       return drawBrute(ctx, x, y, size, p, t);
+    case 'dart':
+      return drawDart(ctx, x, y, size, p, t, opts);
+    case 'guard':
+      return drawGuard(ctx, x, y, size, p, t);
+    case 'bomber':
+      return drawBomber(ctx, x, y, size, p, t, opts);
+    case 'brood':
+      return drawBrood(ctx, x, y, size, p, t);
+    case 'mender':
+      return drawMender(ctx, x, y, size, p, t);
+    case 'mite':
+      return drawMite(ctx, x, y, size, p, t);
     case 'boss':
       return drawBoss(ctx, x, y, size, p, t, opts.phase ?? 1);
     case 'orb':

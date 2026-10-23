@@ -10,6 +10,8 @@
     "preview": "vite preview --host 0.0.0.0 --port 5191",
     "test": "node --test",
     "test:e2e": "node tools/e2e.mjs",
+    "sim:balance": "node tools/balance-sim.mjs",
+    "perf:stress": "node tools/stress-perf.mjs",
     "check:boundaries": "node tools/check-boundaries.mjs",
     "wechat": "node tools/build-wechat.mjs",
     "test:wechat": "node tools/wechat-smoke.mjs",

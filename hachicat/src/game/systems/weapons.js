@@ -78,6 +78,7 @@ function fire(world, weapon, def, stats, angle, range) {
           radius: 8,
           knockback: 18,
           sprite: WEAPON_PROJECTILE_SPRITE[def.id] || 'proj.generic',
+          sourceKind: 'projectile',
         });
       }
       world.stats.shots += count;
@@ -86,14 +87,18 @@ function fire(world, weapon, def, stats, angle, range) {
 
     case 'melee': {
       const arc = stats.arc || 2.2;
-      hitArcEnemies(world, angle, range, arc, stats, { knockback: stats.knockback || 0 });
+      hitArcEnemies(world, angle, range, arc, stats, { knockback: stats.knockback || 0, sourceKind: 'melee' });
       spawnSlash(world, p.x, p.y, angle, range, arc, 'accent');
       return true;
     }
 
     case 'cone': {
       const arc = stats.arc || 1.9;
-      const hits = hitArcEnemies(world, angle, range, arc, stats, { knockback: stats.knockback || 0, slow: stats });
+      const hits = hitArcEnemies(world, angle, range, arc, stats, {
+        knockback: stats.knockback || 0,
+        slow: stats,
+        sourceKind: 'melee',
+      });
       spawnPuff(world, p.x, p.y, angle, range, arc, 'accent');
       if (hits > 0) world.shake = Math.min(1, world.shake + 0.08);
       return true;
@@ -113,6 +118,7 @@ function fire(world, weapon, def, stats, angle, range) {
           knockback: 30,
           dirX: Math.cos(angle),
           dirY: Math.sin(angle),
+          sourceKind: 'beam',
         });
       }
       spawnBeam(world, p.x, p.y, x2, y2, 'danger', 0.12);
@@ -160,6 +166,7 @@ function hitArcEnemies(world, angle, range, arc, stats, opts = {}) {
       knockback: opts.knockback || 0,
       dirX: dx,
       dirY: dy,
+      sourceKind: opts.sourceKind || 'melee',
     });
 
     if (opts.slow && opts.slow.slow) {
@@ -204,6 +211,7 @@ function stepOrbit(world, weapon, def, stats, dt) {
         knockback: 26,
         dirX: Math.cos(a),
         dirY: Math.sin(a),
+        sourceKind: 'melee',
       });
       weapon.state.hits.set(e.id, stats.tick || 0.3);
     }
@@ -246,6 +254,7 @@ export function stepTraps(world, dt) {
         knockback: 260,
         dirX: e.x - t.x,
         dirY: e.y - t.y,
+        sourceKind: 'trap',
       });
     }
     spawnShock(world, t.x, t.y, t.blast, 'coin');

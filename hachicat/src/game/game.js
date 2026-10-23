@@ -1,6 +1,6 @@
 import { createWorld, updateCamera, viewRect } from './world.js';
 import { createRng } from './rng.js';
-import { WAVES, getWave, pickFromPool, waveClearReward, TOTAL_WAVES } from '../content/waves.js';
+import { WAVES, getWave, pickFromPool, waveClearReward, shouldSpawnElite, TOTAL_WAVES } from '../content/waves.js';
 import { getCommission, commissionPayout, commissionRank } from '../content/commissions.js';
 import { ALL_ENEMIES, scaleEnemy } from '../content/enemies.js';
 import { getCharacter } from '../content/characters.js';
@@ -22,6 +22,7 @@ import {
   generateShop,
   buyOffer,
   rerollShop,
+  rerollPrice,
   buyHeal,
   healPrice,
   canEquipWeapon,
@@ -102,6 +103,9 @@ export class Game {
 
     const w = this.world;
     w.waveIndex = n;
+    w.waveMaxAlive = wave.maxAlive;
+    w.spawnCount = 0;
+    this.spawnCount = 0;
     w.enemies.length = 0;
     w.bullets.length = 0;
     w.enemyBullets.length = 0;
@@ -175,8 +179,10 @@ export class Game {
     if (this.spawnTimer > 0) return;
 
     this.spawnTimer = wave.interval * (0.75 + this.rng() * 0.5);
+    this.spawnCount = (this.spawnCount || 0) + 1;
     const id = pickFromPool(wave.pool, this.rng);
-    const def = scaleEnemy(ALL_ENEMIES[id], this.waveIndex, false);
+    const elite = shouldSpawnElite(wave, this.spawnCount);
+    const def = scaleEnemy(ALL_ENEMIES[id], this.waveIndex, false, elite);
     const pos = this.spawnPosition(def.radius);
     spawnEnemy(w, def, pos.x, pos.y, this.rng);
   }
@@ -456,7 +462,7 @@ export class Game {
       shop: this.shop
         ? {
             rerolls: this.shop.rerolls,
-            rerollCost: this.shop.rerollCost + this.shop.rerolls * 3,
+            rerollCost: rerollPrice(this.shop),
             healPrice: this.shop.healPrice ?? healPrice(p),
             hp: Math.ceil(p.hp),
             maxHp: Math.round(p.stats.maxHp),
@@ -527,6 +533,33 @@ export class Game {
     if (!this.world) return false;
     this.world.player.money += amount;
     return true;
+  }
+
+  debugSpawn(defId, opts = {}) {
+    if (!this.world) return null;
+    const base = ALL_ENEMIES[defId];
+    if (!base) return null;
+    const def = scaleEnemy(base, this.waveIndex, false, !!opts.elite);
+    const x = Math.max(40, Math.min(this.world.arena.w - 40, this.world.player.x + (opts.x ?? 150)));
+    const y = Math.max(40, Math.min(this.world.arena.h - 40, this.world.player.y + (opts.y ?? 0)));
+    const enemy = spawnEnemy(this.world, def, x, y, this.rng);
+    return { id: enemy.defId, elite: enemy.elite, hp: enemy.hp, maxHp: enemy.maxHp, ai: enemy.ai };
+  }
+
+  debugEnemies() {
+    if (!this.world) return [];
+    return this.world.enemies.map((e) => ({
+      id: e.defId,
+      elite: e.elite,
+      ai: e.ai,
+      hp: Math.round(e.hp),
+      maxHp: e.maxHp,
+      warnT: e.warnT || 0,
+      fuseT: e.fuseT || 0,
+      radialWarn: e.radialWarn || 0,
+      telegraph: e.telegraph || 0,
+      summonCount: e.summonCount || 0,
+    }));
   }
 
   debugAddWeapon(id, level = 1) {

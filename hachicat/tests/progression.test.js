@@ -7,8 +7,8 @@ import { xpForLevel, rollUpgradeOptions, applyUpgrade, canEquipWeapon, addWeapon
 import { getCharacter } from '../src/content/characters.js';
 import { healPlayer } from '../src/game/systems/damage.js';
 
-test('xp 曲线单调递增，1 级为 13', () => {
-  assert.equal(xpForLevel(1), 13);
+test('xp 曲线单调递增，1 级为 16', () => {
+  assert.equal(xpForLevel(1), 16);
   let prev = 0;
   for (let lv = 1; lv <= 30; lv++) {
     const v = xpForLevel(lv);

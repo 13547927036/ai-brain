@@ -14,7 +14,7 @@ export const COMMISSIONS = {
     brief: `清理 ${TOTAL_WAVES} 波异动生物，击退首领「铁肺」。`,
     /** 接单即付的底薪，失败也有；胜利再加完成奖金。 */
     basePay: 30,
-    victoryBonus: 60,
+    victoryBonus: 80,
     ranks: [
       { rank: 'S', victory: true },
       { rank: 'A', minWave: 10 },

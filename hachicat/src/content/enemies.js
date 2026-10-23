@@ -1,6 +1,17 @@
 /**
  * 敌人数据（纯数值 / AI 类型）。
- * ai: chase 追击 | weave 蛇形 | shooter 远程 | boss 首领
+ *
+ * ai:
+ *   chase     直线追击
+ *   weave     蛇形追击
+ *   shooter   保持距离并发射投射物
+ *   boss      首领（多阶段）
+ *   dash      预警后高速突进
+ *   bomber    贴近后预警自爆
+ *   summoner  保持距离，周期性召唤弱小敌人
+ *   support   为周围敌人回血
+ *
+ * 行为差异必须体现在 AI + 预警 + 处理优先级上，不能只改颜色和血量。
  */
 export const ENEMY_LIST = [
   {
@@ -50,7 +61,7 @@ export const ENEMY_LIST = [
     ai: 'shooter',
     keepDistance: 220,
     fireCd: 2.4,
-    bulletSpeed: 205,
+    bulletSpeed: 230,
     bulletDamage: 8,
     desc: '远远地朝你喷水，会保持距离。',
   },
@@ -69,6 +80,130 @@ export const ENEMY_LIST = [
     ai: 'chase',
     desc: '又慢又硬的大家伙，撞一下很痛。',
   },
+
+  // ---------- 第 4 波起：突进 ----------
+  {
+    id: 'dart',
+    name: '疾走快递',
+    sprite: 'enemy.dart',
+    radius: 13,
+    hp: 20,
+    speed: 66,
+    damage: 8,
+    xp: 2,
+    coin: 2,
+    armor: 0,
+    knockbackResist: 0.05,
+    ai: 'dash',
+    dashRange: 290,
+    warnTime: 0.55,
+    dashSpeed: 510,
+    dashTime: 0.28,
+    dashCd: 2.9,
+    desc: '先刹车亮灯，再沿直线猛冲；看到预警就侧移。',
+  },
+
+  // ---------- 第 5 波起：减伤 ----------
+  {
+    id: 'guard',
+    name: '铁皮箱',
+    sprite: 'enemy.guard',
+    radius: 19,
+    hp: 52,
+    speed: 37,
+    damage: 11,
+    xp: 3,
+    coin: 3,
+    armor: 3,
+    knockbackResist: 0.55,
+    ai: 'chase',
+    ward: { kind: 'ranged', reduction: 0.55, minDistance: 120 },
+    desc: '正面焊着铁皮，远程打上去会被弹开；贴身或陷阱更有效。',
+  },
+
+  // ---------- 第 6 波起：自爆 ----------
+  {
+    id: 'bomber',
+    name: '漏电电池',
+    sprite: 'enemy.bomber',
+    radius: 14,
+    hp: 28,
+    speed: 58,
+    damage: 4,
+    xp: 2,
+    coin: 2,
+    armor: 0,
+    knockbackResist: 0.1,
+    ai: 'bomber',
+    fuseRange: 100,
+    fuseTime: 1.1,
+    blastRadius: 88,
+    blastDamage: 20,
+    fuseCd: 2.4,
+    desc: '贴近后开始漏电闪烁，约 1.1 秒后爆炸；可以提前打掉，也可以拉开。',
+  },
+
+  // ---------- 第 7 波起：召唤 ----------
+  {
+    id: 'brood',
+    name: '孵化箱',
+    sprite: 'enemy.brood',
+    radius: 20,
+    hp: 50,
+    speed: 34,
+    damage: 6,
+    xp: 4,
+    coin: 3,
+    armor: 1,
+    knockbackResist: 0.4,
+    ai: 'summoner',
+    keepDistance: 250,
+    summonCd: 5.8,
+    summonCount: 2,
+    summonMax: 4,
+    summonId: 'mite',
+    desc: '躲在后方不断放出螺丝崽；同屏召唤有上限，优先拆掉它。',
+  },
+
+  // ---------- 第 8 波起：支援 ----------
+  {
+    id: 'mender',
+    name: '维修灯',
+    sprite: 'enemy.mender',
+    radius: 15,
+    hp: 36,
+    speed: 44,
+    damage: 4,
+    xp: 3,
+    coin: 3,
+    armor: 1,
+    knockbackResist: 0.2,
+    ai: 'support',
+    keepDistance: 210,
+    healRadius: 150,
+    healAmount: 6,
+    healCd: 1.8,
+    healMax: 3,
+    desc: '举着焊灯给周围机器补血；不处理会让整群敌人变耐打。',
+  },
+
+  // ---------- 召唤物（不掉落） ----------
+  {
+    id: 'mite',
+    name: '螺丝崽',
+    sprite: 'enemy.mite',
+    radius: 8,
+    hp: 7,
+    speed: 108,
+    damage: 3,
+    xp: 0,
+    coin: 0,
+    armor: 0,
+    knockbackResist: 0,
+    ai: 'chase',
+    summonOnly: true,
+    desc: '孵化箱掉出来的小螺丝，数量有上限，不掉金币和经验。',
+  },
 ];
 
 export const ENEMY_BY_ID = Object.fromEntries(ENEMY_LIST.map((e) => [e.id, e]));
@@ -80,12 +215,12 @@ export const BOSSES = {
     title: '第 12 波 · 首领',
     sprite: 'enemy.boss',
     radius: 46,
-    hp: 2600,
-    speed: 44,
-    damage: 22,
-    xp: 30,
-    coin: 40,
-    armor: 4,
+    hp: 9000,
+    speed: 46,
+    damage: 26,
+    xp: 60,
+    coin: 90,
+    armor: 5,
     knockbackResist: 1,
     ai: 'boss',
     desc: '巷子尽头的巨型吸尘器，吸口里亮着不祥的红光。',
@@ -94,8 +229,22 @@ export const BOSSES = {
 
 export const ALL_ENEMIES = { ...ENEMY_BY_ID, ...BOSSES };
 
-/** 按波次缩放敌人属性（不改动原始数据）。 */
-export function scaleEnemy(def, wave, isBoss = false) {
+/** 精英倍率：更强、更大、奖励更高，行为与本体一致。 */
+export const ELITE_SCALING = {
+  hp: 1.8,
+  damage: 1.25,
+  speed: 1.08,
+  radius: 1.12,
+  armor: 2,
+  reward: 3,
+};
+
+/**
+ * 按波次缩放敌人属性（不改动原始数据）。
+ * 普通怪：生命 +22%/波、伤害 +10%/波、护甲每 4 波 +1。
+ * 精英：在普通缩放基础上再乘 ELITE_SCALING。
+ */
+export function scaleEnemy(def, wave, isBoss = false, elite = false) {
   if (isBoss) {
     return {
       ...def,
@@ -105,18 +254,29 @@ export function scaleEnemy(def, wave, isBoss = false) {
       speed: def.speed,
       armor: def.armor,
       spawnWave: wave,
+      elite: false,
     };
   }
-  const hpMul = 1 + 0.17 * (wave - 1);
-  const dmgMul = 1 + 0.08 * (wave - 1);
-  const spdMul = 1 + 0.009 * (wave - 1);
+  const hpMul = 1 + 0.22 * (wave - 1);
+  const dmgMul = 1 + 0.1 * (wave - 1);
+  const spdMul = 1 + 0.01 * (wave - 1);
+  const eliteHp = elite ? ELITE_SCALING.hp : 1;
+  const eliteDmg = elite ? ELITE_SCALING.damage : 1;
+  const eliteSpd = elite ? ELITE_SCALING.speed : 1;
+  const eliteRadius = elite ? ELITE_SCALING.radius : 1;
+  const eliteArmor = elite ? ELITE_SCALING.armor : 0;
+  const rewardMul = elite ? ELITE_SCALING.reward : 1;
   return {
     ...def,
-    hp: Math.round(def.hp * hpMul),
-    maxHp: Math.round(def.hp * hpMul),
-    damage: Math.round(def.damage * dmgMul * 10) / 10,
-    speed: def.speed * spdMul,
-    armor: def.armor + Math.floor((wave - 1) / 5),
+    hp: Math.round(def.hp * hpMul * eliteHp),
+    maxHp: Math.round(def.hp * hpMul * eliteHp),
+    damage: Math.round(def.damage * dmgMul * eliteDmg * 10) / 10,
+    speed: def.speed * spdMul * eliteSpd,
+    radius: def.radius * eliteRadius,
+    armor: def.armor + Math.floor((wave - 1) / 4) + eliteArmor,
+    xp: Math.round(def.xp * rewardMul),
+    coin: Math.round(def.coin * rewardMul),
     spawnWave: wave,
+    elite: !!elite,
   };
 }

@@ -1,14 +1,23 @@
 import { UPGRADES, RARITY_WEIGHT } from '../content/upgrades.js';
-import { WEAPONS, weaponPrice, WEAPON_COPY_CHANCE, WEAPON_COPY_PRICE_RATIO } from '../content/weapons.js';
+import {
+  WEAPONS,
+  weaponPrice,
+  WEAPON_COPY_CHANCE,
+  WEAPON_COPY_PRICE_RATIO,
+  WEAPON_LEVEL_PRICE_MUL,
+} from '../content/weapons.js';
 import { ITEMS, ITEM_BY_ID } from '../content/items.js';
 import { MAX_WEAPONS, MAX_WEAPON_LEVEL } from './constants.js';
 import { recomputePlayerStats } from './stats.js';
 import { weightedPick } from './rng.js';
 import { getWeapon } from '../content/weapons.js';
 
-/** 升到 level+1 所需经验。 */
+/** 刷新商店的基础价格。 */
+export const REROLL_BASE_COST = 8;
+
+/** 升到 level+1 所需经验。比旧曲线略慢，用来抵消新增怪物带来的经验增量。 */
 export function xpForLevel(level) {
-  return Math.round(6 + level * 6 + Math.pow(level, 1.4));
+  return Math.round(8 + level * 7 + Math.pow(level, 1.45));
 }
 
 export function rollUpgradeOptions(player, rng, count = 3) {
@@ -52,11 +61,12 @@ function makeWeapon(weaponId, level = 1) {
   };
 }
 
-/** 直购价：拿下 offerLevel 级的这件武器要多少钱。 */
+/** 直购价：拿下 offerLevel 级的这件武器要多少钱（等级越高溢价越陡）。 */
 export function weaponOfferPrice(weaponId, offerLevel) {
   const def = getWeapon(weaponId);
   if (!def) return 0;
-  return Math.round(weaponPrice(def) * (1 + 0.3 * (offerLevel - 1)));
+  const lv = Math.max(1, Math.min(WEAPON_LEVEL_PRICE_MUL.length, offerLevel));
+  return Math.round(weaponPrice(def) * WEAPON_LEVEL_PRICE_MUL[lv - 1]);
 }
 
 /** 副本单价：level 级副本的价钱，恒低于「升到 level+1」的直购价的一半。 */
@@ -174,7 +184,7 @@ export function generateShop(player, rng, wave) {
       type: 'weapon',
       weaponId: def.id,
       level,
-      price: Math.round(weaponPrice(def) * (1 + 0.3 * (level - 1))),
+      price: weaponOfferPrice(def.id, level),
       sold: false,
     });
   }
@@ -198,7 +208,13 @@ export function generateShop(player, rng, wave) {
     });
   }
 
-  return { offers, rerolls: 0, rerollCost: 6, healPrice: healPrice(player), wave };
+  return { offers, rerolls: 0, rerollCost: REROLL_BASE_COST, healPrice: healPrice(player), wave };
+}
+
+/** 第 n 次刷新的价格：8 → 11 → 17 → 26 → 38……递增幅度逐次变大。 */
+export function rerollPrice(shop) {
+  const n = shop?.rerolls || 0;
+  return REROLL_BASE_COST + 3 * n * (n + 1) / 2;
 }
 
 export function buyOffer(player, shop, index) {
@@ -235,19 +251,19 @@ export function buyOffer(player, shop, index) {
 }
 
 export function rerollShop(player, shop, rng, wave) {
-  const cost = shop.rerollCost + shop.rerolls * 3;
+  const cost = rerollPrice(shop);
   if (player.money < cost) return { ok: false, reason: 'money', cost };
   player.money -= cost;
   shop.rerolls += 1;
   const fresh = generateShop(player, rng, wave);
   shop.offers = fresh.offers;
-  shop.rerollCost = cost;
+  shop.rerollCost = rerollPrice(shop);
   shop.healPrice = healPrice(player);
   return { ok: true, cost };
 }
 
 export function healPrice(player) {
-  return 14 + Math.round(player.stats.maxHp * 0.07);
+  return 18 + Math.round(player.stats.maxHp * 0.09);
 }
 
 export function buyHeal(player, shop) {
@@ -255,5 +271,5 @@ export function buyHeal(player, shop) {
   if (player.money < price) return { ok: false, reason: 'money', price };
   if (player.hp >= player.stats.maxHp) return { ok: false, reason: 'full', price };
   player.money -= price;
-  return { ok: true, price, amount: Math.round(player.stats.maxHp * 0.38) };
+  return { ok: true, price, amount: Math.round(player.stats.maxHp * 0.34) };
 }

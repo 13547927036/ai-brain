@@ -37,6 +37,12 @@ if (import.meta.env.DEV || location.search.includes('debug=1')) {
       controller.game.debugHeal();
       controller.publish();
     },
+    spawn: (id, opts = {}) => {
+      const res = controller.game.debugSpawn(id, opts);
+      controller.publish();
+      return res;
+    },
+    enemies: () => controller.game.debugEnemies(),
     killBoss: () => {
       controller.game.debugKillBoss();
       controller.publish();

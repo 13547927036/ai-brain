@@ -2,11 +2,25 @@ import { PLAYER_INVULN } from '../constants.js';
 import { spawnSpark, spawnText, spawnShock, spawnRing } from './effects.js';
 import { addPickup } from './pickups.js';
 
-/** 对敌人造成伤害：护甲减免 + 暴击飘字 + 击退 + 死亡结算。 */
+/**
+ * 对敌人造成伤害：护甲减免 + 减伤 + 暴击飘字 + 击退 + 死亡结算。
+ * opts.sourceKind: projectile | beam | melee | trap，用于「铁皮箱」的远程减伤。
+ */
 export function damageEnemy(world, enemy, amount, opts = {}) {
   if (enemy.dead) return 0;
   const armor = enemy.armor || 0;
-  const dmg = Math.max(1, amount - armor);
+  let dmg = Math.max(1, amount - armor);
+
+  // 定向减伤：远距离的弹道 / 射线会被铁皮弹开，贴身与陷阱不受影响
+  const ward = enemy.ward;
+  if (ward && ward.kind === 'ranged' && isRangedSource(opts.sourceKind)) {
+    const p = world.player;
+    const dist = Math.hypot(enemy.x - p.x, enemy.y - p.y);
+    if (dist > (ward.minDistance || 120)) {
+      dmg = Math.max(1, dmg * (1 - (ward.reduction || 0)));
+    }
+  }
+
   enemy.hp -= dmg;
   enemy.flash = 0.12;
   world.stats.damageDealt += dmg;
@@ -30,13 +44,21 @@ export function damageEnemy(world, enemy, amount, opts = {}) {
   return dmg;
 }
 
-export function killEnemy(world, enemy) {
+function isRangedSource(kind) {
+  return kind === 'projectile' || kind === 'beam';
+}
+
+/** opts.loot=false 用于自爆怪：仍计击杀，但不掉金币 / 经验。 */
+export function killEnemy(world, enemy, opts = {}) {
   if (enemy.dead) return;
   enemy.dead = true;
   world.stats.kills += 1;
+  if (world.stats.killedBy) {
+    world.stats.killedBy[enemy.defId] = (world.stats.killedBy[enemy.defId] || 0) + 1;
+  }
 
-  if (world.rng) {
-    addPickup(world, 'xp', enemy.x, enemy.y, enemy.xp, world.rng);
+  if (world.rng && opts.loot !== false) {
+    if (enemy.xp > 0) addPickup(world, 'xp', enemy.x, enemy.y, enemy.xp, world.rng);
     if (enemy.coin > 0) addPickup(world, 'coin', enemy.x + 6, enemy.y + 4, enemy.coin, world.rng);
   }
 
@@ -47,13 +69,13 @@ export function killEnemy(world, enemy) {
     world.shake = 1.4;
     world.bossDefeated = true;
   } else {
-    spawnSpark(world, enemy.x, enemy.y, 'accent', 6, 150);
-    world.shake = Math.min(1, world.shake + 0.05);
+    spawnSpark(world, enemy.x, enemy.y, enemy.elite ? 'coin' : 'accent', enemy.elite ? 12 : 6, 150);
+    world.shake = Math.min(1, world.shake + (enemy.elite ? 0.12 : 0.05));
   }
 }
 
-/** 玩家受伤：护甲减免、无敌帧、击退、屏震。 */
-export function damagePlayer(world, amount, sourceX = world.player.x, sourceY = world.player.y) {
+/** 玩家受伤：护甲减免、无敌帧、击退、屏震。sourceType 用于诊断「谁造成的伤害」。 */
+export function damagePlayer(world, amount, sourceX = world.player.x, sourceY = world.player.y, sourceType = 'other') {
   const p = world.player;
   if (!p.alive || p.invuln > 0) return 0;
 
@@ -62,6 +84,12 @@ export function damagePlayer(world, amount, sourceX = world.player.x, sourceY = 
   p.invuln = PLAYER_INVULN;
   p.flash = 0.18;
   world.shake = Math.min(1.2, world.shake + 0.6);
+
+  if (world.stats) {
+    world.stats.damageTaken = (world.stats.damageTaken || 0) + dmg;
+    if (!world.stats.damageTakenBy) world.stats.damageTakenBy = {};
+    world.stats.damageTakenBy[sourceType] = (world.stats.damageTakenBy[sourceType] || 0) + dmg;
+  }
 
   spawnText(world, p.x, p.y - 28, `-${dmg}`, 'danger', { size: 18 });
   spawnSpark(world, p.x, p.y, 'danger', 8, 170);

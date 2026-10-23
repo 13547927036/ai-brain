@@ -136,11 +136,18 @@ function updatePlayerAnim(t, p) {
     const enemies = world.enemies.slice().sort((a, b) => a.y - b.y);
     for (const e of enemies) {
       if (e.dead || !inView(e.x, e.y, 80)) continue;
+      drawEnemyAura(ctx, e, theme, t);
       const hitTint = e.flash > 0;
       ctx.save();
       if (hitTint) ctx.filter = 'brightness(1.75)';
-      drawSprite(ctx, e.sprite, e.x, e.y, { theme, t: e.t, size: undefined });
+      drawSprite(ctx, e.sprite, e.x, e.y, {
+        theme,
+        t: e.t,
+        fuse: e.fuseT > 0 ? 1 - e.fuseT / e.fuseMax : 0,
+        angle: e.ai === 'dash' ? e.warnAngle : 0,
+      });
       ctx.restore();
+      drawEnemyTelegraph(ctx, e, theme, t);
 
       if (e.slow > 0) {
         ctx.strokeStyle = theme.colors.accent;
@@ -151,7 +158,7 @@ function updatePlayerAnim(t, p) {
         ctx.stroke();
         ctx.globalAlpha = 1;
       }
-      if (!e.isBoss && e.hp < e.maxHp && e.radius >= 20) {
+      if (!e.isBoss && e.hp < e.maxHp && (e.elite || e.radius >= 20)) {
         const w = e.radius * 2.2;
         const y = e.y - e.radius - 14;
         ctx.fillStyle = 'rgba(0,0,0,0.45)';
@@ -237,6 +244,145 @@ function updatePlayerAnim(t, p) {
     }
 
     if (joystick) drawJoystick(ctx, joystick, theme, width, height);
+  }
+
+  /** 敌人光环 / 精英标记：让玩家一眼分清处理优先级。 */
+  function drawEnemyAura(c, e, theme, t) {
+    if (e.ai === 'support') {
+      const pulse = e.healPulse > 0 ? 0.11 : 0.04;
+      c.save();
+      c.fillStyle = theme.fx.heal;
+      c.globalAlpha = pulse;
+      c.beginPath();
+      c.arc(e.x, e.y, e.healRadius, 0, Math.PI * 2);
+      c.fill();
+      c.globalAlpha = 0.18;
+      c.strokeStyle = theme.fx.heal;
+      c.lineWidth = 1.2;
+      c.beginPath();
+      c.arc(e.x, e.y, e.healRadius, 0, Math.PI * 2);
+      c.stroke();
+      c.restore();
+    } else if (e.ai === 'brood') {
+      c.save();
+      c.globalAlpha = 0.22 + Math.sin(t * 3 + e.seedPhase) * 0.08;
+      c.strokeStyle = theme.colors.danger;
+      c.lineWidth = 1.4;
+      c.setLineDash([5, 7]);
+      c.beginPath();
+      c.arc(e.x, e.y, e.radius + 14, 0, Math.PI * 2);
+      c.stroke();
+      c.restore();
+    }
+
+    if (e.elite) {
+      c.save();
+      const r = e.radius + 7;
+      c.globalAlpha = 0.75 + Math.sin(t * 4 + e.seedPhase) * 0.15;
+      c.strokeStyle = theme.colors.coin;
+      c.lineWidth = 2.5;
+      c.beginPath();
+      c.arc(e.x, e.y, r, 0, Math.PI * 2);
+      c.stroke();
+      c.globalAlpha = 0.4;
+      c.lineWidth = 1.2;
+      c.beginPath();
+      c.arc(e.x, e.y, r + 4, 0, Math.PI * 2);
+      c.stroke();
+      // 四角尖刺，远看也能和普通怪区分
+      c.fillStyle = theme.colors.coin;
+      c.globalAlpha = 0.9;
+      for (let i = 0; i < 4; i++) {
+        const a = (i / 4) * Math.PI * 2 + Math.PI / 4;
+        const px = e.x + Math.cos(a) * (r + 3);
+        const py = e.y + Math.sin(a) * (r + 3);
+        c.beginPath();
+        c.moveTo(px + Math.cos(a) * 6, py + Math.sin(a) * 6);
+        c.lineTo(px + Math.cos(a + 2.2) * 3, py + Math.sin(a + 2.2) * 3);
+        c.lineTo(px + Math.cos(a - 2.2) * 3, py + Math.sin(a - 2.2) * 3);
+        c.closePath();
+        c.fill();
+      }
+      c.restore();
+    }
+  }
+
+  /** 攻击预警：突进线、自爆圈、首领冲刺 / 环形弹幕。 */
+  function drawEnemyTelegraph(c, e, theme, t) {
+    if (e.ai === 'dash' && e.warnT > 0) {
+      const p = 1 - e.warnT / Math.max(0.001, e.warnMax);
+      const len = e.dashSpeed * e.dashTime + 80;
+      c.save();
+      c.translate(e.x, e.y);
+      c.rotate(e.warnAngle);
+      c.globalAlpha = 0.35 + p * 0.5;
+      c.strokeStyle = theme.colors.danger;
+      c.lineWidth = 3;
+      c.setLineDash([10, 8]);
+      c.beginPath();
+      c.moveTo(e.radius, 0);
+      c.lineTo(len, 0);
+      c.stroke();
+      c.setLineDash([]);
+      c.beginPath();
+      c.arc(len, 0, 9, 0, Math.PI * 2);
+      c.stroke();
+      c.globalAlpha = 0.5 + p * 0.4;
+      c.beginPath();
+      c.arc(0, 0, e.radius + 6, 0, Math.PI * 2);
+      c.stroke();
+      c.restore();
+    }
+
+    if (e.fuseT > 0) {
+      const p = 1 - e.fuseT / Math.max(0.001, e.fuseMax);
+      c.save();
+      c.fillStyle = theme.colors.danger;
+      c.globalAlpha = 0.08 + p * 0.18;
+      c.beginPath();
+      c.arc(e.x, e.y, e.blastRadius, 0, Math.PI * 2);
+      c.fill();
+      c.globalAlpha = 0.55 + p * 0.35;
+      c.strokeStyle = theme.colors.danger;
+      c.lineWidth = 2;
+      c.beginPath();
+      c.arc(e.x, e.y, e.blastRadius, 0, Math.PI * 2);
+      c.stroke();
+      c.restore();
+    }
+
+    if (e.isBoss && e.telegraph > 0) {
+      const p = 1 - e.telegraph / Math.max(0.001, e.telegraphMax);
+      const len = 560;
+      c.save();
+      c.translate(e.x, e.y);
+      c.rotate(e.telegraphAngle);
+      c.globalAlpha = 0.3 + p * 0.45;
+      c.strokeStyle = theme.colors.danger;
+      c.lineWidth = 4;
+      c.setLineDash([14, 10]);
+      c.beginPath();
+      c.moveTo(e.radius, 0);
+      c.lineTo(len, 0);
+      c.stroke();
+      c.setLineDash([]);
+      c.beginPath();
+      c.arc(0, 0, e.radius + 10, 0, Math.PI * 2);
+      c.stroke();
+      c.restore();
+    }
+
+    if (e.isBoss && e.radialWarn > 0) {
+      const p = 1 - e.radialWarn / Math.max(0.001, e.radialWarnMax);
+      c.save();
+      c.globalAlpha = 0.35 + p * 0.5;
+      c.strokeStyle = theme.colors.danger;
+      c.lineWidth = 3;
+      c.beginPath();
+      c.arc(e.x, e.y, e.radius + 18 + p * 44, 0, Math.PI * 2);
+      c.stroke();
+      c.restore();
+    }
   }
 
   function drawVignette(theme) {

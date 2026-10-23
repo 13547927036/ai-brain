@@ -113,12 +113,18 @@ export function weaponLevelStats(weaponId, level) {
 }
 
 export function weaponPrice(def) {
-  return { 1: 18, 2: 30, 3: 46 }[def.rarity] || 20;
+  return { 1: 20, 2: 34, 3: 52 }[def.rarity] || 22;
 }
+
+/**
+ * 高等级升级的溢价曲线：等级越高越贵，避免后期金币无处可花。
+ * 下标 = 目标等级 - 1。
+ */
+export const WEAPON_LEVEL_PRICE_MUL = [1, 1.5, 2.25, 3.4, 4.8];
 
 /**
  * 同等级副本：商店按概率出售已有武器的同级副本，两件同级靠合成升一级。
  * 副本单价按对应直购升级价打折，比例须小于 0.5，否则直购路线失去意义。
  */
 export const WEAPON_COPY_CHANCE = 0.3;
-export const WEAPON_COPY_PRICE_RATIO = 0.45;
+export const WEAPON_COPY_PRICE_RATIO = 0.42;

@@ -15,6 +15,7 @@ export function spawnBullet(world, opts) {
     ttl: opts.ttl ?? 1.2,
     sprite: opts.sprite || 'proj.generic',
     knockback: opts.knockback ?? 16,
+    sourceKind: opts.sourceKind || 'projectile',
   };
   world.bullets.push(b);
   return b;
@@ -45,6 +46,7 @@ export function stepBullets(world, dt) {
           knockback: b.knockback,
           dirX: b.vx,
           dirY: b.vy,
+          sourceKind: b.sourceKind,
         });
         b.hits.push(e.id);
         spawnSpark(world, b.x, b.y, 'hit', 2, 70);
@@ -69,6 +71,7 @@ export function spawnEnemyBullet(world, opts) {
     damage: opts.damage,
     ttl: opts.ttl ?? 5,
     sprite: opts.sprite || 'proj.water',
+    source: opts.source || 'bullet',
     spin: 0,
   });
 }
@@ -90,7 +93,7 @@ export function stepEnemyBullets(world, dt) {
     if (!dead && p.alive) {
       const rr = b.radius + p.radius;
       if ((p.x - b.x) ** 2 + (p.y - b.y) ** 2 <= rr * rr) {
-        damagePlayer(world, b.damage, b.x, b.y);
+        damagePlayer(world, b.damage, b.x, b.y, b.source);
         spawnSpark(world, b.x, b.y, 'enemyBullet', 4, 90);
         dead = true;
       }

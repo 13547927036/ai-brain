@@ -241,6 +241,65 @@ check('第 1 波开始', battle.wave === 1, `wave=${battle.wave}`);
 check('HUD 显示波次', (await page.locator('.hud__wave-main').innerText()).includes('第 1 波'));
 check('初始武器 1 件', battle.weapons.length === 1, `weapons=${battle.weapons.length}`);
 
+/* ---------------- 2.5 新怪物与预警 ---------------- */
+const roster = await page.evaluate(() => {
+  const ids = ['dart', 'guard', 'bomber', 'brood', 'mender', 'mite'];
+  const spawned = ids.map((id, i) =>
+    window.__hachicat.spawn(id, { x: 62 + (i % 3) * 48, y: -104 + Math.floor(i / 3) * 64 })
+  );
+  const elite = window.__hachicat.spawn('sweeper', { elite: true, x: -120, y: 96 });
+  return { spawned, elite, list: window.__hachicat.enemies() };
+});
+check(
+  '6 种新怪物都能生成',
+  roster.spawned.every((e) => e && e.id) && roster.spawned.length === 6,
+  roster.spawned.map((e) => e?.id).join(',')
+);
+check(
+  '精英怪带有光环标记且生命更高',
+  roster.elite?.elite === true && roster.elite.maxHp > 0,
+  JSON.stringify(roster.elite)
+);
+await page.waitForTimeout(180);
+await shot('03b-new-enemies');
+const rosterStats = await canvasStats();
+check('新怪物渲染后画布仍有内容', !!rosterStats && rosterStats.max - rosterStats.min > 30, JSON.stringify(rosterStats));
+
+const dartFx = await page.evaluate(async () => {
+  const g = window.__hachicat.controller.game;
+  const p = g.world.player;
+  const e = g.world.enemies.find((x) => x.defId === 'dart');
+  if (e) {
+    e.x = p.x + 220;
+    e.y = p.y;
+    e.dashCd = 0;
+  }
+  await new Promise((r) => setTimeout(r, 180));
+  return window.__hachicat.enemies().find((x) => x.id === 'dart');
+});
+check('疾走快递进入突进预警', dartFx?.warnT > 0 || dartFx?.ai === 'dash', JSON.stringify(dartFx));
+
+const bomberFx = await page.evaluate(async () => {
+  const g = window.__hachicat.controller.game;
+  const p = g.world.player;
+  const e = g.world.enemies.find((x) => x.defId === 'bomber');
+  if (e) {
+    e.x = p.x + 55;
+    e.y = p.y;
+    e.fuseCd = 0;
+  }
+  await new Promise((r) => setTimeout(r, 220));
+  return window.__hachicat.enemies().find((x) => x.id === 'bomber');
+});
+check('漏电电池进入引信状态', bomberFx?.fuseT > 0, JSON.stringify(bomberFx));
+
+await page.evaluate(() => {
+  window.__hachicat.controller.game.world.enemies.length = 0;
+  window.__hachicat.controller.game.world.enemyBullets.length = 0;
+  window.__hachicat.controller.publish();
+});
+await page.waitForTimeout(120);
+
 const stats = await canvasStats();
 check('Canvas 有实际渲染内容', !!stats && stats.max - stats.min > 30, JSON.stringify(stats));
 
@@ -447,13 +506,47 @@ check('进入第 2 波', wave2.mode === 'battle' && wave2.wave === 2, `wave=${wa
 await shot('09-wave2');
 
 /* ---------------- 6. 首领 ---------------- */
+await page.evaluate(() => {
+  const g = window.__hachicat.controller.game;
+  g.world.player.stats.maxHp = 9999;
+  g.world.player.hp = 9999;
+  window.__hachicat.jumpWave(11);
+});
+await page.waitForTimeout(5000);
+const stress = await page.evaluate(() => ({
+  enemies: window.__hachicat.hero().enemies,
+  ids: [...new Set(window.__hachicat.enemies().map((e) => e.id))],
+}));
+check('第 11 波至少 10 个敌人同屏', stress.enemies >= 10, `enemies=${stress.enemies}`);
+check(
+  '第 11 波混入新怪物',
+  stress.ids.some((id) => ['dart', 'guard', 'bomber', 'brood', 'mender'].includes(id)),
+  stress.ids.join(',')
+);
+await shot('09b-wave11');
+
 await page.evaluate(() => window.__hachicat.jumpWave(12));
-await page.waitForTimeout(2200);
+await page.waitForTimeout(3800);
 await shot('10-boss');
 const bossState = await page.evaluate(() => window.__hachicat.state());
 check('首领波触发', bossState.wave === 12 && bossState.bossWave === true);
 check('首领血条出现', !!bossState.boss, `boss=${JSON.stringify(bossState.boss)}`);
 check('首领血条 DOM 可见', await page.locator('.hud__boss').isVisible());
+const bossFx = await page.evaluate(() => {
+  const g = window.__hachicat.controller.game;
+  const b = g.world.boss;
+  return {
+    maxHp: b?.maxHp || 0,
+    radialWarn: b?.radialWarn || 0,
+    telegraph: b?.telegraph || 0,
+    bullets: g.world.enemyBullets.length,
+  };
+});
+check(
+  '首领是持久战且带弹幕 / 冲刺预警',
+  bossFx.maxHp >= 8000 && (bossFx.radialWarn > 0 || bossFx.telegraph > 0 || bossFx.bullets > 0),
+  JSON.stringify(bossFx)
+);
 
 /* ------------- 7. 胜利 → 重开 → 失败 ------------- */
 await page.evaluate(() => window.__hachicat.killBoss());

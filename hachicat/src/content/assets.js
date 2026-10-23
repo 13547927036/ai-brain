@@ -81,6 +81,54 @@ export const SPRITES = {
       paper: { body: '#9b8a6d', bodyDark: '#75664c', glow: '#c48a1c', eye: '#b5382a', lid: '#c2ae8b' },
     },
   },
+  'enemy.dart': {
+    kind: 'dart',
+    size: 30,
+    palette: { body: '#ff8a5c', bodyDark: '#b4522f', glow: '#ffd166', eye: '#67e8f9', wheel: '#33262a' },
+    themeOverrides: {
+      paper: { body: '#d08a5f', bodyDark: '#9b6238', glow: '#c48a1c', eye: '#2f7f74', wheel: '#4d4030' },
+    },
+  },
+  'enemy.guard': {
+    kind: 'guard',
+    size: 46,
+    palette: { body: '#8b93a8', plate: '#c9d3e6', bodyDark: '#5a6178', rivet: '#3a4155', eye: '#ffce54' },
+    themeOverrides: {
+      paper: { body: '#a89a7f', plate: '#d8c9a8', bodyDark: '#7a6a52', rivet: '#4d4030', eye: '#b5382a' },
+    },
+  },
+  'enemy.bomber': {
+    kind: 'bomber',
+    size: 30,
+    palette: { body: '#6b7f5a', bodyDark: '#46543a', core: '#ff5c7a', spark: '#ffd166', stripe: '#e8e0c0' },
+    themeOverrides: {
+      paper: { body: '#8f9b74', bodyDark: '#61704c', core: '#c2452f', spark: '#c48a1c', stripe: '#efe6cf' },
+    },
+  },
+  'enemy.brood': {
+    kind: 'brood',
+    size: 42,
+    palette: { body: '#7c6a9a', bodyDark: '#52456b', glass: '#b7e3ff', egg: '#ffd166', eye: '#ff5c7a' },
+    themeOverrides: {
+      paper: { body: '#9b8a74', bodyDark: '#6f5f49', glass: '#bfe0d8', egg: '#c48a1c', eye: '#a8321f' },
+    },
+  },
+  'enemy.mender': {
+    kind: 'mender',
+    size: 34,
+    palette: { body: '#5aa9a0', bodyDark: '#3a7973', light: '#a7f3d0', cross: '#ffd166', eye: '#ffce54' },
+    themeOverrides: {
+      paper: { body: '#7fa58a', bodyDark: '#5d7f68', light: '#d8efe0', cross: '#c48a1c', eye: '#b5382a' },
+    },
+  },
+  'enemy.mite': {
+    kind: 'mite',
+    size: 18,
+    palette: { body: '#c9d3e6', bodyDark: '#78839c', eye: '#ff5c7a', spark: '#ffd166' },
+    themeOverrides: {
+      paper: { body: '#d8c9a8', bodyDark: '#9b8a6d', eye: '#a8321f', spark: '#c48a1c' },
+    },
+  },
   'enemy.boss': {
     kind: 'boss',
     size: 104,
