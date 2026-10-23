@@ -183,8 +183,30 @@ check(
   charArt.map((c) => `${c.id}:${c.ready ? `${c.w}x${c.h}` : '加载失败'}`).join(' ')
 );
 
-const cardNames = await page.locator('.char-card__name').allInnerTexts();
+const cardCopy = await page.locator('.char-card').evaluateAll((els) =>
+  els.map((el) => {
+    const row = el.querySelector('.char-card__row');
+    return {
+      name: el.querySelector('.char-card__name').textContent.trim(),
+      title: el.querySelector('.char-card__title').textContent.trim(),
+      rowOverflow: row.scrollWidth - row.clientWidth,
+      cardOverflow: el.scrollWidth - el.clientWidth,
+    };
+  })
+);
+const cardNames = cardCopy.map((c) => c.name);
 check('选角页角色名与图片绑定一致', cardNames.join(',') === '小八,吉伊,乌萨奇', cardNames.join(','));
+check(
+  '选角页角色描述与角色对应',
+  cardCopy.map((c) => `${c.name}:${c.title}`).join('|') ===
+    '小八:温柔可靠的日常搭档|吉伊:有点胆小却努力的冒险家|乌萨奇:精力充沛的自由行动派',
+  cardCopy.map((c) => `${c.name}:${c.title}`).join(' | ')
+);
+check(
+  '角色描述没有溢出卡片',
+  cardCopy.every((c) => c.rowOverflow <= 0 && c.cardOverflow <= 0),
+  cardCopy.map((c) => `${c.name}:${c.rowOverflow}/${c.cardOverflow}`).join(' ')
+);
 
 const iconPixels = await page.evaluate(() =>
   [...document.querySelectorAll('.char-card__sprite canvas')].map((cv) => {

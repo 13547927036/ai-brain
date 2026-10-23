@@ -6,7 +6,7 @@ export const CHARACTERS = [
   {
     id: 'hachiware',
     name: '小八',
-    title: '巷口的老大',
+    title: '温柔可靠的日常搭档',
     desc: '皮糙肉厚，一出门就带着毛球弹。适合第一次闯巷子的猫。',
     sprite: 'cat.hachiware',
     base: {
@@ -28,7 +28,7 @@ export const CHARACTERS = [
   {
     id: 'chiikawa',
     name: '吉伊',
-    title: '屋顶的影子',
+    title: '有点胆小却努力的冒险家',
     desc: '跑得最快，靠磨爪贴身撕开一条路。血薄，别被围住。',
     sprite: 'cat.chiikawa',
     base: {
@@ -50,7 +50,7 @@ export const CHARACTERS = [
   {
     id: 'usagi',
     name: '乌萨奇',
-    title: '冷柜上的白猫',
+    title: '精力充沛的自由行动派',
     desc: '眼神像激光笔。远程点射贯穿一排，但腿脚不太利索。',
     sprite: 'cat.usagi',
     base: {

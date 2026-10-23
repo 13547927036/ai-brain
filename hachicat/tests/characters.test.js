@@ -70,6 +70,25 @@ test('三个角色的标识、名称与图片一一对应，不会错位', () =>
   assert.equal(new Set(images).size, 3, '三个角色不能共用同一张图片');
 });
 
+test('三个角色的描述与当前形象一致，旧设定文案已清除', () => {
+  const TITLES = {
+    hachiware: '温柔可靠的日常搭档',
+    chiikawa: '有点胆小却努力的冒险家',
+    usagi: '精力充沛的自由行动派',
+  };
+  const STALE = ['巷口的老大', '屋顶的影子', '冷柜上的白猫'];
+  for (const e of EXPECTED) {
+    const c = CHARACTER_BY_ID[e.id];
+    assert.equal(c.title, TITLES[e.id], `${c.name} 的角色描述不符`);
+    assert.ok(c.title.length >= 4 && c.title.length <= 12, `${c.name} 描述长度异常：${c.title.length}`);
+    assert.equal(STALE.includes(c.title), false, `${c.name} 仍在使用旧描述`);
+    assert.ok(c.desc && c.desc.length > 0, `${c.name} 缺少详细说明`);
+  }
+  const titles = EXPECTED.map((e) => CHARACTER_BY_ID[e.id].title);
+  assert.equal(new Set(titles).size, 3, '三个角色的描述不能重复');
+  assert.equal(CHARACTERS.some((c) => STALE.includes(c.title)), false, '存在旧描述残留');
+});
+
 test('角色位图恰好三个，且没有残留其它猫素材', () => {
   const cats = Object.keys(SPRITES).filter((k) => k.startsWith('cat.'));
   assert.deepEqual(cats.sort(), EXPECTED_IDS.map((id) => 'cat.' + id).sort());
