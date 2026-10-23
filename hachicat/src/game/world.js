@@ -6,7 +6,7 @@ import { getCharacter } from '../content/characters.js';
 /**
  * 创建一个局内世界。世界是纯数据对象，不引用 DOM / Canvas。
  */
-export function createWorld({ characterId = 'ginger', seed = 1 } = {}) {
+export function createWorld({ characterId = 'hachiware', seed = 1 } = {}) {
   const character = getCharacter(characterId);
   const base = { ...character.base };
   const stats = computeStats(base, []);

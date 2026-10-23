@@ -8,7 +8,7 @@ import { ALL_ENEMIES, scaleEnemy } from '../src/content/enemies.js';
 function setup(weaponId, distance = 60) {
   const game = new Game({ seed: 12345 });
   game.setViewport(390, 844);
-  game.startRun('ginger');
+  game.startRun('hachiware');
   const world = game.world;
   world.player.weapons = [{ id: weaponId, level: 1, cd: 0 }];
   world.enemies.length = 0;

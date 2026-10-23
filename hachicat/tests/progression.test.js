@@ -18,7 +18,7 @@ test('xp 曲线单调递增，1 级为 13', () => {
 });
 
 test('computeStats 会夹紧极端数值', () => {
-  const base = { ...getCharacter('ginger').base, speed: 999, crit: 5, armor: -3 };
+  const base = { ...getCharacter('hachiware').base, speed: 999, crit: 5, armor: -3 };
   const s = computeStats(base, []);
   assert.equal(s.speed, 340);
   assert.equal(s.crit, 0.85);
@@ -42,7 +42,7 @@ test('rollDamage 暴击按概率生效', () => {
 });
 
 test('升级三选一不重复，且能修改属性', () => {
-  const w = createWorld({ characterId: 'ginger', seed: 1 });
+  const w = createWorld({ characterId: 'hachiware', seed: 1 });
   const p = w.player;
   const rng = createRng(4);
   const options = rollUpgradeOptions(p, rng, 3);
@@ -56,7 +56,7 @@ test('升级三选一不重复，且能修改属性', () => {
 });
 
 test('武器可升级、可满栏判断', () => {
-  const w = createWorld({ characterId: 'ginger', seed: 1 });
+  const w = createWorld({ characterId: 'hachiware', seed: 1 });
   const p = w.player;
   assert.equal(p.weapons.length, 1);
   assert.equal(canEquipWeapon(p, p.weapons[0].id), true);
@@ -68,7 +68,7 @@ test('武器可升级、可满栏判断', () => {
 });
 
 test('满 6 件武器后不能装新武器', () => {
-  const w = createWorld({ characterId: 'ginger', seed: 1 });
+  const w = createWorld({ characterId: 'hachiware', seed: 1 });
   const p = w.player;
   for (const id of ['claw', 'hiss', 'laser', 'tail', 'trap']) addWeapon(p, id);
   assert.equal(p.weapons.length, 6);
@@ -77,7 +77,7 @@ test('满 6 件武器后不能装新武器', () => {
 });
 
 test('商店固定 4 个报价（2 武器 + 2 道具）', () => {
-  const w = createWorld({ characterId: 'ginger', seed: 2 });
+  const w = createWorld({ characterId: 'hachiware', seed: 2 });
   const shop = generateShop(w.player, createRng(8), 3);
   assert.equal(shop.offers.length, 4);
   assert.equal(shop.offers.filter((o) => o.type === 'weapon').length, 2);
@@ -86,7 +86,7 @@ test('商店固定 4 个报价（2 武器 + 2 道具）', () => {
 });
 
 test('购买武器扣款并标记已售，重复购买被拒绝', () => {
-  const w = createWorld({ characterId: 'ginger', seed: 3 });
+  const w = createWorld({ characterId: 'hachiware', seed: 3 });
   const p = w.player;
   p.money = 999;
   const shop = generateShop(p, createRng(9), 2);
@@ -103,7 +103,7 @@ test('购买武器扣款并标记已售，重复购买被拒绝', () => {
 });
 
 test('钱不够时不能购买', () => {
-  const w = createWorld({ characterId: 'ginger', seed: 4 });
+  const w = createWorld({ characterId: 'hachiware', seed: 4 });
   const p = w.player;
   p.money = 0;
   const shop = generateShop(p, createRng(10), 1);
@@ -113,7 +113,7 @@ test('钱不够时不能购买', () => {
 });
 
 test('治疗扣款并返回回血量，满血拒绝', () => {
-  const w = createWorld({ characterId: 'ginger', seed: 5 });
+  const w = createWorld({ characterId: 'hachiware', seed: 5 });
   const p = w.player;
   p.money = 500;
   p.hp = 10;
@@ -130,7 +130,7 @@ test('治疗扣款并返回回血量，满血拒绝', () => {
 });
 
 test('healPlayer 回血且不超过上限', () => {
-  const w = createWorld({ characterId: 'ginger', seed: 15 });
+  const w = createWorld({ characterId: 'hachiware', seed: 15 });
   const p = w.player;
   p.hp = 10;
   healPlayer(w, 40);
@@ -140,7 +140,7 @@ test('healPlayer 回血且不超过上限', () => {
 });
 
 test('刷新商店会收费并更换商品', () => {
-  const w = createWorld({ characterId: 'ginger', seed: 6 });
+  const w = createWorld({ characterId: 'hachiware', seed: 6 });
   const p = w.player;
   p.money = 500;
   const shop = generateShop(p, createRng(12), 4);

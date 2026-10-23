@@ -52,7 +52,7 @@ export class Game {
     this.result = null;
     this.events = [];
     this.totalTime = 0;
-    this.characterId = 'ginger';
+    this.characterId = 'hachiware';
     this.lastReward = 0;
     this.rng = createRng(this.baseSeed);
     this.viewport = { w: 390, h: 844 };
@@ -68,7 +68,7 @@ export class Game {
     }
   }
 
-  startRun(characterId = 'ginger', seed) {
+  startRun(characterId = 'hachiware', seed) {
     this.runs += 1;
     this.characterId = characterId;
     const runSeed = (seed ?? this.baseSeed + this.runs * 7919) >>> 0;

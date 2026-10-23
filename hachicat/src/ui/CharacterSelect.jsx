@@ -10,7 +10,7 @@ function weaponName(id) {
 }
 
 export default function CharacterSelect({ controller, snap }) {
-  const [selected, setSelected] = useState('ginger');
+  const [selected, setSelected] = useState('hachiware');
   const current = CHARACTERS.find((c) => c.id === selected) || CHARACTERS[0];
   const commission = getCommission();
 
@@ -28,14 +28,12 @@ export default function CharacterSelect({ controller, snap }) {
 
       <div className="char-list">
         {CHARACTERS.map((c) => {
-          const locked = c.unlock ? !snap.shadowUnlocked : false;
-          const active = c.id === selected && !locked;
+          const active = c.id === selected;
           return (
             <button
               key={c.id}
-              className={`char-card ${active ? 'is-active' : ''} ${locked ? 'is-locked' : ''}`}
+              className={`char-card ${active ? 'is-active' : ''}`}
               aria-pressed={active}
-              disabled={locked}
               data-testid={`char-${c.id}`}
               onClick={() => setSelected(c.id)}
             >
@@ -57,12 +55,6 @@ export default function CharacterSelect({ controller, snap }) {
                   <span>移速 {c.base.speed}</span>
                 </span>
               </span>
-              {locked && (
-                <span className="char-card__lock">
-                  <Icon name="lock" size={12} />
-                  {c.unlock.label}
-                </span>
-              )}
             </button>
           );
         })}

@@ -3,6 +3,8 @@ import { THEMES, getTheme } from '../content/theme.js';
 import { createRenderer } from '../render/renderer.js';
 import { createJoystick } from '../input/joystick.js';
 import { STORAGE_KEYS } from '../platform/types.js';
+import { SPRITES } from '../content/assets.js';
+import { preloadCharImages } from '../render/char-images.js';
 
 /**
  * 应用控制器：把平台、游戏、渲染、输入粘在一起，并向 React 暴露快照。
@@ -33,6 +35,9 @@ export class GameController {
     this.listeners = new Set();
     this.snapshot = this.buildSnapshot();
     this.applyTheme();
+
+    // 启动即预加载角色图片：第一次进战斗就能直接用图片，不会先闪一下兜底画面
+    preloadCharImages(Object.values(SPRITES).map((s) => s.image).filter(Boolean));
   }
 
   /* ---------------- 订阅（给 useSyncExternalStore 用） ---------------- */
@@ -60,7 +65,6 @@ export class GameController {
       bestWave: this.meta.bestWave || 0,
       runs: this.meta.runs || 0,
       wins: this.meta.wins || 0,
-      shadowUnlocked: (this.meta.bestWave || 0) >= 8,
       platform: this.platform.name,
     };
   }
@@ -293,7 +297,7 @@ export class GameController {
   }
 
   restart() {
-    this.startRun(this.game.characterId || 'ginger');
+    this.startRun(this.game.characterId || 'hachiware');
   }
 
   quitToMenu() {

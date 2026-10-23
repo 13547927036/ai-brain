@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { Game } from '../src/game/game.js';
 import { TOTAL_WAVES } from '../src/content/waves.js';
 
-function newGame(seed = 20260101, character = 'ginger') {
+function newGame(seed = 20260101, character = 'hachiware') {
   const g = new Game({ seed });
   g.setViewport(390, 844);
   g.startRun(character);

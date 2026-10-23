@@ -24,44 +24,28 @@ const CAT_PALETTE = {
 };
 
 export const SPRITES = {
-  // ---------- 玩家猫 ----------
-  'cat.ginger': {
-    kind: 'cat',
+  // ---------- 玩家角色（图片素材）----------
+  // 素材由原图裁掉透明边、再按同一系数等比缩放到"内容宽度 192px"导出，
+  // 因此三者的相对比例与原图完全一致（不透明像素比在原图与成品间误差 < 0.2%），
+  // 透明背景、颜色、主体均未改动，也没有任何拉伸变形。
+  // palette 只作为图片不可用时的程序化兜底配色。
+  'cat.hachiware': {
+    kind: 'image',
+    image: './chars/hachiware.png',
     size: 44,
     palette: CAT_PALETTE,
   },
-  'cat.soot': {
-    kind: 'cat',
+  'cat.chiikawa': {
+    kind: 'image',
+    image: './chars/chiikawa.png',
     size: 42,
-    palette: {
-      ...CAT_PALETTE,
-      fur: '#4a5266', furDark: '#2c3242', belly: '#8d97ad',
-      earInner: '#6b7488', eye: '#9df5ff', pupil: '#0a1018',
-      nose: '#d9a0b0', scarf: '#ffce54', stripe: '#2c3242',
-    },
+    palette: CAT_PALETTE,
   },
-  'cat.frost': {
-    kind: 'cat',
+  'cat.usagi': {
+    kind: 'image',
+    image: './chars/usagi.png',
     size: 44,
-    palette: {
-      ...CAT_PALETTE,
-      fur: '#eef4ff', furDark: '#b9c7e2', belly: '#ffffff',
-      earInner: '#ffc9d8', eye: '#3d7dff', pupil: '#0a1024',
-      nose: '#ff9fb8', scarf: '#7aa7ff', stripe: '#cfdcf5',
-    },
-  },
-  'cat.shadow': {
-    kind: 'cat',
-    size: 43,
-    palette: {
-      ...CAT_PALETTE,
-      fur: '#3b2a4d', furDark: '#241733', belly: '#6b4a83',
-      earInner: '#8b5aa8', eye: '#ff7ad9', pupil: '#150a1e',
-      nose: '#ff8fb0', scarf: '#b06bff', stripe: '#513469',
-    },
-    themeOverrides: {
-      paper: { fur: '#5b4166', furDark: '#3a2742', belly: '#8b6a97', eye: '#b13a6a' },
-    },
+    palette: CAT_PALETTE,
   },
 
   // ---------- 敌人 ----------

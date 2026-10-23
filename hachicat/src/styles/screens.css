@@ -191,7 +191,8 @@ html[data-theme='neon'] .brand__title {
 .char-list {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 14px;
+  justify-content: center;
   overflow-y: auto;
   padding: 2px 2px 6px;
   -webkit-overflow-scrolling: touch;
@@ -224,10 +225,6 @@ html[data-theme='neon'] .brand__title {
 
 html[data-theme='paper'] .char-card.is-active {
   box-shadow: 0 0 0 2px var(--accent);
-}
-
-.char-card.is-locked {
-  opacity: 0.55;
 }
 
 .char-card__sprite {
@@ -284,18 +281,6 @@ html[data-theme='paper'] .char-card.is-active {
   gap: 4px;
   color: var(--text-dim);
   font-weight: 700;
-}
-
-.char-card__lock {
-  position: absolute;
-  right: 12px;
-  top: 12px;
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  font-size: 10px;
-  font-weight: 800;
-  color: var(--accent-2);
 }
 
 .char-footer {

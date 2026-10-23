@@ -25,7 +25,7 @@ function makeWeapon(id, level) {
 
 /** 造一个可控玩家：清空武器、装满钱。 */
 function makePlayer(money = 500) {
-  const w = createWorld({ characterId: 'ginger', seed: 1 });
+  const w = createWorld({ characterId: 'hachiware', seed: 1 });
   const p = w.player;
   p.weapons.length = 0;
   p.money = money;

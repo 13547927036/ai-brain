@@ -4,12 +4,11 @@
  */
 export const CHARACTERS = [
   {
-    id: 'ginger',
-    name: '橘座',
+    id: 'hachiware',
+    name: '小八',
     title: '巷口的老大',
     desc: '皮糙肉厚，一出门就带着毛球弹。适合第一次闯巷子的猫。',
-    sprite: 'cat.ginger',
-    unlock: null,
+    sprite: 'cat.hachiware',
     base: {
       maxHp: 120,
       speed: 170,
@@ -27,12 +26,11 @@ export const CHARACTERS = [
     trait: '最大生命 +20%，护甲 +1',
   },
   {
-    id: 'soot',
-    name: '煤球',
+    id: 'chiikawa',
+    name: '吉伊',
     title: '屋顶的影子',
     desc: '跑得最快，靠磨爪贴身撕开一条路。血薄，别被围住。',
-    sprite: 'cat.soot',
-    unlock: null,
+    sprite: 'cat.chiikawa',
     base: {
       maxHp: 90,
       speed: 208,
@@ -50,12 +48,11 @@ export const CHARACTERS = [
     trait: '移速 +22%，攻速 +18%',
   },
   {
-    id: 'frost',
-    name: '雪团',
+    id: 'usagi',
+    name: '乌萨奇',
     title: '冷柜上的白猫',
     desc: '眼神像激光笔。远程点射贯穿一排，但腿脚不太利索。',
-    sprite: 'cat.frost',
-    unlock: null,
+    sprite: 'cat.usagi',
     base: {
       maxHp: 96,
       speed: 158,
@@ -71,30 +68,7 @@ export const CHARACTERS = [
     },
     startWeapon: 'laser',
     trait: '伤害 +22%，射程 +12%',
-  },
-  {
-    id: 'shadow',
-    name: '影丸',
-    title: '除尘管里的传说',
-    desc: '在尘袋里活下来的猫。攻速极快，靠哈气把整条街的机器吹退。',
-    sprite: 'cat.shadow',
-    unlock: { type: 'wave', value: 8, label: '通关第 8 波后解锁' },
-    base: {
-      maxHp: 84,
-      speed: 190,
-      damageMul: 1.15,
-      attackSpeedMul: 1.35,
-      rangeMul: 0.92,
-      pickup: 68,
-      armor: 0,
-      crit: 0.12,
-      critMul: 1.55,
-      luck: 1,
-      regen: 0,
-    },
-    startWeapon: 'hiss',
-    trait: '攻速 +35%，暴击 +12%',
-  },
+  }
 ];
 
 export const CHARACTER_BY_ID = Object.fromEntries(CHARACTERS.map((c) => [c.id, c]));

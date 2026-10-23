@@ -149,17 +149,64 @@ await page.waitForTimeout(250);
 await shot('02-characters');
 
 const cards = await page.locator('.char-card').count();
-check('角色卡 4 张', cards === 4, `count=${cards}`);
-check('未解锁角色被禁用', await page.locator('[data-testid="char-shadow"]').isDisabled());
+check('角色卡恰好 3 张', cards === 3, `count=${cards}`);
+check('不存在第四个角色入口', (await page.locator('[data-testid="char-shadow"]').count()) === 0);
 check('选角页展示委托', (await page.locator('.screen__title').innerText()).includes('讨伐委托'));
 
-await page.locator('[data-testid="char-soot"]').click();
+/* ---------------- 角色形象：图片素材 ---------------- */
+const charArt = await page.evaluate(async () => {
+  const { SPRITES } = await import('/src/content/assets.js');
+  const { CHARACTERS } = await import('/src/content/characters.js');
+  const art = await import('/src/render/char-images.js');
+  return CHARACTERS.map((c) => {
+    const sprite = SPRITES[c.sprite] || {};
+    const entry = sprite.image ? art.getCharImage(sprite.image) : null;
+    return {
+      id: c.id,
+      name: c.name,
+      kind: sprite.kind || '',
+      url: sprite.image || '',
+      ready: !!entry && entry.ready,
+      w: entry ? entry.img.naturalWidth : 0,
+      h: entry ? entry.img.naturalHeight : 0,
+    };
+  });
+});
+check(
+  '三个角色都绑定到图片素材',
+  charArt.length === 3 && charArt.every((c) => c.kind === 'image' && c.url),
+  charArt.map((c) => `${c.id}:${c.kind || '无'}`).join(' ')
+);
+check(
+  '三张角色图片加载成功且尺寸正常',
+  charArt.every((c) => c.ready && c.w >= 96 && c.h >= 64),
+  charArt.map((c) => `${c.id}:${c.ready ? `${c.w}x${c.h}` : '加载失败'}`).join(' ')
+);
+
+const cardNames = await page.locator('.char-card__name').allInnerTexts();
+check('选角页角色名与图片绑定一致', cardNames.join(',') === '小八,吉伊,乌萨奇', cardNames.join(','));
+
+const iconPixels = await page.evaluate(() =>
+  [...document.querySelectorAll('.char-card__sprite canvas')].map((cv) => {
+    const d = cv.getContext('2d').getImageData(0, 0, cv.width, cv.height).data;
+    let n = 0;
+    for (let i = 3; i < d.length; i += 4) if (d[i] > 0) n += 1;
+    return n;
+  })
+);
+check(
+  '选角卡上的角色图已画出像素',
+  iconPixels.length === 3 && iconPixels.every((n) => n > 200),
+  iconPixels.join(',')
+);
+
+await page.locator('[data-testid="char-chiikawa"]').click();
 await page.waitForTimeout(120);
 check(
   '选角高亮切换',
-  (await page.locator('[data-testid="char-soot"]').getAttribute('aria-pressed')) === 'true'
+  (await page.locator('[data-testid="char-chiikawa"]').getAttribute('aria-pressed')) === 'true'
 );
-await page.locator('[data-testid="char-ginger"]').click();
+await page.locator('[data-testid="char-hachiware"]').click();
 await page.waitForTimeout(120);
 
 await page.locator('[data-testid="start-run"]').click();
@@ -174,6 +221,48 @@ check('初始武器 1 件', battle.weapons.length === 1, `weapons=${battle.weapo
 
 const stats = await canvasStats();
 check('Canvas 有实际渲染内容', !!stats && stats.max - stats.min > 30, JSON.stringify(stats));
+
+/* 战斗画面：玩家必须用图片素材，而不是程序化兜底 */
+const battleArt = await page.evaluate(async () => {
+  const ctrl = window.__hachicat.controller;
+  const p = ctrl.game.world.player;
+  const { SPRITES } = await import('/src/content/assets.js');
+  const art = await import('/src/render/char-images.js');
+  const sprite = SPRITES[p.sprite] || {};
+  const entry = sprite.image ? art.getCharImage(sprite.image) : null;
+  const cam = ctrl.game.world.camera;
+  const size = ctrl.renderer.size;
+  const cv = document.querySelector('canvas.game__canvas');
+  const ctx = cv.getContext('2d');
+  const px = Math.round((size.width / 2 - cam.x + p.x) * size.dpr);
+  const py = Math.round((size.height / 2 - cam.y + p.y) * size.dpr);
+  const half = Math.round(30 * size.dpr);
+  const x0 = Math.max(0, px - half);
+  const y0 = Math.max(0, py - half);
+  const w = Math.min(cv.width - x0, half * 2);
+  const h = Math.min(cv.height - y0, half * 2);
+  let light = 0;
+  let opaque = 0;
+  if (w > 0 && h > 0) {
+    const d = ctx.getImageData(x0, y0, w, h).data;
+    for (let i = 0; i < d.length; i += 4) {
+      if (d[i + 3] < 8) continue;
+      opaque += 1;
+      if (d[i] > 200 && d[i + 1] > 200 && d[i + 2] > 200) light += 1;
+    }
+  }
+  return { sprite: p.sprite, kind: sprite.kind || '', ready: !!entry && entry.ready, light, opaque };
+});
+check(
+  '战斗中的玩家使用图片素材且已加载',
+  battleArt.kind === 'image' && battleArt.ready,
+  `${battleArt.sprite} kind=${battleArt.kind} ready=${battleArt.ready}`
+);
+check(
+  '战斗画面玩家位置画出角色像素',
+  battleArt.light > 60,
+  `浅色像素=${battleArt.light} 不透明=${battleArt.opaque}`
+);
 check(
   'Canvas 尺寸匹配视口（DPR 2）',
   stats && stats.w > 700 && stats.h > 1500,
@@ -402,8 +491,8 @@ await shot('13-paper-menu');
 
 await page.locator('[data-testid="start-game"]').click();
 await page.waitForTimeout(200);
-check('解锁角色可用', !(await page.locator('[data-testid="char-shadow"]').isDisabled()));
-await page.locator('[data-testid="char-shadow"]').click();
+check('第三个角色可选中', !(await page.locator('[data-testid="char-usagi"]').isDisabled()));
+await page.locator('[data-testid="char-usagi"]').click();
 await page.locator('[data-testid="start-run"]').click();
 await page.waitForTimeout(1400);
 await shot('14-paper-battle');

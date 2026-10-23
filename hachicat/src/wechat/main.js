@@ -209,38 +209,28 @@ function drawCharSelect() {
   text('选择角色', w / 2, 58, 26, theme.colors.text, 'center', '800');
   text('每个角色有不同基础属性与起始武器', w / 2, 90, 13, 'rgba(233,239,255,0.6)', 'center');
 
-  const cardH = Math.min(112, (h - 190) / 4 - 10);
+  const cardH = Math.min(112, (h - 190) / 3 - 10);
   let y = 118;
-  const tints = [theme.colors.accent2, theme.colors.accent, theme.colors.xp, theme.colors.danger];
+  const tints = [theme.colors.accent2, theme.colors.accent, theme.colors.xp];
   CHARACTERS.forEach((c, ci) => {
-    const needWave = (c.unlock && c.unlock.value) || 0;
-    const locked = needWave > (meta.bestWave || 0);
     const x = 18;
     const cw = w - 36;
-    ctx.fillStyle = locked ? 'rgba(255,255,255,0.04)' : 'rgba(255,255,255,0.08)';
+    ctx.fillStyle = 'rgba(255,255,255,0.08)';
     fillRoundRect(x, y, cw, cardH, 16);
-    ctx.strokeStyle = locked ? 'rgba(255,255,255,0.08)' : 'rgba(103,232,249,0.35)';
+    ctx.strokeStyle = 'rgba(103,232,249,0.35)';
     ctx.lineWidth = 1;
     strokeRoundRect(x, y, cw, cardH, 16);
 
     // 头像色块（小游戏阶段先用色块占位，正式换皮时替换为精灵图）
-    ctx.fillStyle = locked ? 'rgba(255,255,255,0.12)' : tints[ci % tints.length];
+    ctx.fillStyle = tints[ci % tints.length];
     ctx.beginPath();
     ctx.arc(x + 36, y + cardH / 2, 20, 0, Math.PI * 2);
     ctx.fill();
 
-    text(locked ? '???' : c.name, x + 70, y + cardH * 0.34, 19, locked ? 'rgba(255,255,255,0.4)' : theme.colors.text, 'left', '700');
-    text(
-      locked ? c.unlock?.label || `第 ${needWave} 波后解锁` : c.trait || c.desc || '',
-      x + 70,
-      y + cardH * 0.64,
-      12,
-      'rgba(233,239,255,0.6)'
-    );
+    text(c.name, x + 70, y + cardH * 0.34, 19, theme.colors.text, 'left', '700');
+    text(c.trait || c.desc || '', x + 70, y + cardH * 0.64, 12, 'rgba(233,239,255,0.6)');
 
-    if (!locked) {
-      button(x + cw - 96, y + cardH / 2 - 20, 80, 40, '出战', 'startRun', c.id, { size: 15 });
-    }
+    button(x + cw - 96, y + cardH / 2 - 20, 80, 40, '出战', 'startRun', c.id, { size: 15 });
     y += cardH + 10;
   });
   button(w * 0.2, h - 78, w * 0.6, 46, '返回', 'backMenu', null);

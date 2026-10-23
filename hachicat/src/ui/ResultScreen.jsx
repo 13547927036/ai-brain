@@ -9,7 +9,6 @@ export default function ResultScreen({ controller, snap }) {
   const r = snap.result;
   if (!r) return null;
   const win = !!r.victory;
-  const unlocked = snap.shadowUnlocked;
   const payout = r.payout || { total: r.money };
 
   return (
@@ -49,7 +48,7 @@ export default function ResultScreen({ controller, snap }) {
 
         <p className="result__record">
           评价 {r.rank || 'C'} · 最佳纪录 第 {snap.bestWave} 波
-          {!unlocked ? ' · 闯到第 8 波可解锁影丸' : win ? ' · 委托完成' : ''}
+          {win ? ' · 委托完成' : ''}
         </p>
 
         <div className="result__actions">

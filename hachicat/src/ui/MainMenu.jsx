@@ -3,6 +3,7 @@ import Icon from './Icon.jsx';
 import SpriteIcon from './SpriteIcon.jsx';
 import { THEMES } from '../content/theme.js';
 import { getCommission } from '../content/commissions.js';
+import { CHARACTERS } from '../content/characters.js';
 
 export default function MainMenu({ controller, snap }) {
   const best = snap.bestWave || 0;
@@ -30,7 +31,7 @@ export default function MainMenu({ controller, snap }) {
 
       <div className="menu__hero">
         <div className="menu__art">
-          <SpriteIcon spriteId="cat.ginger" size={186} themeId={snap.themeId} />
+          <SpriteIcon spriteId={CHARACTERS[0].sprite} size={186} themeId={snap.themeId} />
           <span className="menu__stamp">{commission.name}</span>
         </div>
         <h1 className="brand__title">哈气猫</h1>

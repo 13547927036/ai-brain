@@ -4,6 +4,7 @@
  * 想换图片素材时，在 drawSprite 里加一个 `kind: 'image'` 分支即可。
  */
 import { resolveSprite } from '../content/assets.js';
+import { getCharImage } from './char-images.js';
 
 /* ---------------- 基础工具 ---------------- */
 
@@ -748,6 +749,8 @@ export function drawSprite(ctx, spriteId, x, y, opts = {}) {
       return drawTrap(ctx, x, y, size, p, opts.armed !== false);
     case 'glyph':
       return drawGlyph(ctx, x, y, size, p, sprite.glyph, t);
+    case 'image':
+      return drawCharImage(ctx, x, y, size, sprite, opts);
     default:
       return null;
   }
@@ -788,4 +791,52 @@ export function drawSpriteIcon(canvas, spriteId, theme, size = 40) {
   ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
   ctx.clearRect(0, 0, size, size);
   drawSprite(ctx, spriteId, size / 2, size / 2, { theme, size: size * 0.78, t: 0.6 });
+}
+/* ---------------- 图片素材角色 ---------------- */
+
+/**
+ * 素材统一按"内容宽度 192px、四边贴合内容"导出（见 content/assets.js 的说明），
+ * 所以这里只按同一系数缩放即可，三个角色的相对比例天然保持一致。
+ *
+ * 屏上内容宽度 = size * 0.70（玩家 size=46 时约 32px，与 PLAYER_RADIUS*2 = 30px
+ * 的判定直径相当）；脚底与程序化猫对齐在 y + size * 16 / 44，正好落在渲染器
+ * 画好的投影椭圆上。
+ *
+ * 素材是正面视角（左右对称度 74%~85%），因此不随 facing 做水平镜像：
+ * 镜像对正面像没有方向意义，反而会翻掉角色自身的特征。
+ */
+const IMAGE_CONTENT_W = 192;
+const IMAGE_SIZE_RATIO = 0.7;
+const IMAGE_FOOT_RATIO = 16 / 44;
+
+function drawCharImage(ctx, x, y, size, sprite, opts) {
+  const entry = getCharImage(sprite.image);
+  // 图片尚未就绪或环境不支持（如微信小游戏）：退回程序化猫，永远画得出东西
+  if (!entry || !entry.ready) return drawCat(ctx, x, y, size, sprite.palette, opts);
+
+  const img = entry.img;
+  const k = (size * IMAGE_SIZE_RATIO) / IMAGE_CONTENT_W;
+  const w = (img.width || IMAGE_CONTENT_W) * k;
+  const h = (img.height || IMAGE_CONTENT_W) * k;
+  const bob = opts.bob ?? 0;
+  const tilt = opts.tilt ?? 0;
+
+  ctx.save();
+  ctx.translate(x, y + bob * 0.6);
+  if (tilt) ctx.rotate(tilt * 0.3);
+  ctx.imageSmoothingEnabled = true;
+  if ('imageSmoothingQuality' in ctx) ctx.imageSmoothingQuality = 'high';
+  ctx.drawImage(img, -w / 2, size * IMAGE_FOOT_RATIO - h, w, h);
+  ctx.restore();
+
+  // 受击闪白与程序化猫完全一致，保证打击反馈不变
+  if (opts.flash > 0) {
+    ctx.save();
+    ctx.globalCompositeOperation = 'lighter';
+    ctx.globalAlpha = Math.min(0.8, opts.flash * 4);
+    ctx.fillStyle = '#fff';
+    ellipse(ctx, x, y, size * 0.42, size * 0.42);
+    ctx.fill();
+    ctx.restore();
+  }
 }
