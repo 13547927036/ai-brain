@@ -1,4 +1,4 @@
-# 吉伊卡哇 · 讨伐委托（同人）
+# 哈奇猫
 
 手机竖屏 Roguelite 生存讨伐。小动物们接下一份讨伐委托，自动攻击，完成 12 波并击退巨兽「隆隆」。
 
@@ -10,6 +10,7 @@
 - 核心逻辑与平台接口分离：同一套 `game/` + `render/` 已接入浏览器与微信小游戏两个入口。
 - 线上地址：<https://hachicat.pages.dev/>（Cloudflare Pages，手机浏览器可直接打开）。
 - 本次题材改造的审计与方案：[docs/chiikawa-theme-redesign.md](docs/chiikawa-theme-redesign.md)。
+- 四方向角色动画素材规范（尚未接入真实素材，当前仍用静态 PNG）：[docs/character-4dir-animation-spec.md](docs/character-4dir-animation-spec.md)。
 
 ---
 

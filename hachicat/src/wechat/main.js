@@ -178,8 +178,8 @@ function drawMenu() {
   ctx.stroke();
   ctx.restore();
 
-  text('吉伊卡哇', cx, h * 0.42, 40, theme.colors.text, 'center', '800');
-  text('CHIIKAWA FAN GAME', cx, h * 0.465, 12, theme.colors.accent, 'center', '600');
+  text('哈奇猫', cx, h * 0.42, 40, theme.colors.text, 'center', '800');
+  text('HACHICAT', cx, h * 0.465, 12, theme.colors.accent, 'center', '600');
   text(`最佳 第 ${meta.bestWave || 0} 波 · 已玩 ${meta.runs || 0} 局`, cx, h * 0.505, 14, 'rgba(251,243,232,0.62)', 'center');
   text('非官方同人作品', cx, h * 0.535, 10, 'rgba(251,243,232,0.42)', 'center');
 

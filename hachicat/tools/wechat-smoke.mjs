@@ -7,7 +7,7 @@ import { readFileSync } from 'node:fs';
 import vm from 'node:vm';
 
 const code = readFileSync('wechat-dist/game.js', 'utf8');
-const calls = { fillRect: 0, fillText: 0, stroke: 0 };
+const calls = { fillRect: 0, fillText: 0, stroke: 0, texts: [] };
 
 const ctx = new Proxy(
   {},
@@ -18,7 +18,10 @@ const ctx = new Proxy(
         return () => ({ addColorStop() {} });
       }
       if (prop === 'fillRect') return () => { calls.fillRect += 1; };
-      if (prop === 'fillText') return () => { calls.fillText += 1; };
+      if (prop === 'fillText') return (text) => {
+        calls.fillText += 1;
+        calls.texts.push(String(text));
+      };
       if (prop === 'stroke') return () => { calls.stroke += 1; };
       if (prop in target) return target[prop];
       return () => {};
@@ -113,6 +116,17 @@ function tap(x, y) {
 }
 
 frames(3); // 菜单
+const menuTexts = calls.texts.slice();
+if (!menuTexts.includes('哈奇猫')) {
+  errors.push('菜单未绘制主标题「哈奇猫」');
+}
+if (menuTexts.some((text) => text.includes('吉伊卡哇') || text.includes('CHIIKAWA FAN GAME'))) {
+  errors.push('菜单仍绘制旧主标题');
+}
+if (!menuTexts.includes('非官方同人作品')) {
+  errors.push('菜单未保留非官方同人声明');
+}
+
 tap(195, 517); // 开始游戏
 frames(3); // 选角
 tap(320, 174); // 第一个角色「出战」

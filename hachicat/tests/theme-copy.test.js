@@ -87,4 +87,8 @@ test('README 与页面都明确标注非官方同人，不声称已获授权', (
   assert.match(index, /非官方/);
   assert.equal(/已获得.*授权|官方授权/.test(readme), false, 'README 不应声称已获得官方授权');
   assert.equal(readme.includes('哈气猫'), false, 'README 仍残留旧标题');
+  assert.match(readme, /^# 哈奇猫$/m, 'README 主标题应为哈奇猫');
+  assert.match(index, /<title>哈奇猫<\/title>/, '浏览器标题应为哈奇猫');
+  assert.equal(readme.includes('吉伊卡哇 · 讨伐委托'), false, 'README 不应把旧标题作为主标题');
+  assert.equal(index.includes('吉伊卡哇 · 讨伐委托'), false, '页面不应把旧标题作为主标题');
 });

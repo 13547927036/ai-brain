@@ -121,7 +121,12 @@ await page.goto(BASE, { waitUntil: 'networkidle' });
 await page.waitForTimeout(500);
 await shot('01-menu');
 
-check('标题渲染', (await page.title()).includes('吉伊卡哇'));
+const brand = await page.evaluate(() => ({
+  title: document.title,
+  h1: document.querySelector('.brand__title')?.textContent?.trim(),
+  en: document.querySelector('.brand__en')?.textContent?.trim(),
+}));
+check('页面与主菜单标题为哈奇猫', brand.title === '哈奇猫' && brand.h1 === '哈奇猫' && brand.en === 'HACHICAT', JSON.stringify(brand));
 check(
   '主菜单主按钮可见',
   await page.locator('[data-testid="start-game"]').isVisible()

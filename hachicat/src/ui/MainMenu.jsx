@@ -34,8 +34,8 @@ export default function MainMenu({ controller, snap }) {
           <SpriteIcon spriteId={CHARACTERS[0].sprite} size={186} themeId={snap.themeId} />
           <span className="menu__stamp">{commission.name}</span>
         </div>
-        <h1 className="brand__title">吉伊卡哇</h1>
-        <p className="brand__en">CHIIKAWA FAN GAME</p>
+        <h1 className="brand__title">哈奇猫</h1>
+        <p className="brand__en">HACHICAT</p>
         <p className="brand__sub">接一份讨伐委托，赚取生活费与想要的东西</p>
         <p className="brand__note">非官方同人作品 · 与原作者及版权方无关</p>
         <div className="menu__brief">
