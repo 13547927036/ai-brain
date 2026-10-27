@@ -91,4 +91,22 @@ test('README 与页面都明确标注非官方同人，不声称已获授权', (
   assert.match(index, /<title>哈奇猫<\/title>/, '浏览器标题应为哈奇猫');
   assert.equal(readme.includes('吉伊卡哇 · 讨伐委托'), false, 'README 不应把旧标题作为主标题');
   assert.equal(index.includes('吉伊卡哇 · 讨伐委托'), false, '页面不应把旧标题作为主标题');
+
+  const screenSources = [
+    'src/ui/MainMenu.jsx',
+    'src/ui/CharacterSelect.jsx',
+    'src/ui/Hud.jsx',
+    'src/ui/PauseScreen.jsx',
+    'src/ui/ResultScreen.jsx',
+    'src/ui/ShopScreen.jsx',
+    'src/ui/UpgradeModal.jsx',
+    'src/wechat/main.js',
+  ];
+  for (const file of screenSources) {
+    const source = readFileSync(new URL(`../${file}`, import.meta.url), 'utf8');
+    assert.equal(source.includes('吉伊卡哇 · 讨伐委托'), false, `${file} 仍残留旧主标题`);
+    assert.equal(source.includes('CHIIKAWA FAN GAME'), false, `${file} 仍残留旧英文标题`);
+  }
+  const mainMenu = readFileSync(new URL('../src/ui/MainMenu.jsx', import.meta.url), 'utf8');
+  assert.match(mainMenu, /<h1 className="brand__title">哈奇猫<\/h1>/, '首页主标题应为哈奇猫');
 });
