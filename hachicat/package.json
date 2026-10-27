@@ -3,7 +3,7 @@
   "private": true,
   "version": "0.1.0",
   "type": "module",
-  "description": "哈气猫 · 手机竖屏 Roguelite 生存射击（React + Vite + Canvas）",
+  "description": "吉伊卡哇 · 讨伐委托（同人）：手机竖屏 Roguelite 生存讨伐（React + Vite + Canvas）",
   "scripts": {
     "dev": "vite --host 0.0.0.0 --port 5190",
     "build": "vite build",

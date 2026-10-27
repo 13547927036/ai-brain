@@ -7,20 +7,21 @@
  *   3. 或者新增一个 kind，在 render/sprites.js 里加一个绘制函数。
  * 战斗逻辑、数值、AI 完全不需要动。
  *
- * kind 目前支持：cat / sweeper / drone / spitter / brute / boss /
+ * kind 目前支持：image / fluff / flutter / spitter / brute / dart / guard /
+ *                bomber / nester / glowcap / mite / boss /
  *                orb / xp / coin / trap / glyph
  */
 
-const CAT_PALETTE = {
-  fur: '#f3a35c',
-  furDark: '#c97a34',
-  belly: '#ffe8c9',
+const CHAR_PALETTE = {
+  body: '#fff4e6',
+  bodyDark: '#e3cbb8',
+  belly: '#fffaf2',
   earInner: '#ffb3a0',
-  eye: '#16222e',
-  pupil: '#070c12',
-  nose: '#ff8fa3',
-  scarf: '#4fd1e0',
-  stripe: '#d9873f',
+  eye: '#2b2440',
+  pupil: '#151020',
+  nose: '#ff9fb8',
+  scarf: '#9be3c3',
+  accent: '#ffd08a',
 };
 
 export const SPRITES = {
@@ -28,137 +29,149 @@ export const SPRITES = {
   // 素材由原图裁掉透明边、再按同一系数等比缩放到"内容宽度 192px"导出，
   // 因此三者的相对比例与原图完全一致（不透明像素比在原图与成品间误差 < 0.2%），
   // 透明背景、颜色、主体均未改动，也没有任何拉伸变形。
-  // palette 只作为图片不可用时的程序化兜底配色。
-  'cat.hachiware': {
+  // palette 只作为图片不可用时的程序化兜底配色；variant 决定兜底外形。
+  'char.hachiware': {
     kind: 'image',
+    variant: 'hachiware',
     image: './chars/hachiware.png',
     size: 44,
-    palette: CAT_PALETTE,
+    palette: { ...CHAR_PALETTE, body: '#fffdf8', bodyDark: '#d8d3e8', scarf: '#7fd8e8' },
   },
-  'cat.chiikawa': {
+  'char.chiikawa': {
     kind: 'image',
+    variant: 'chiikawa',
     image: './chars/chiikawa.png',
     size: 42,
-    palette: CAT_PALETTE,
+    palette: { ...CHAR_PALETTE, body: '#fff1e6', bodyDark: '#e8cdbb', scarf: '#ffd166' },
   },
-  'cat.usagi': {
+  'char.usagi': {
     kind: 'image',
+    variant: 'usagi',
     image: './chars/usagi.png',
     size: 44,
-    palette: CAT_PALETTE,
+    palette: { ...CHAR_PALETTE, body: '#ffe9a8', bodyDark: '#e0c06a', scarf: '#ff9fb8' },
   },
 
-  // ---------- 敌人 ----------
-  'enemy.sweeper': {
-    kind: 'sweeper',
+  // ---------- 敌人：原创讨伐目标 ----------
+  'enemy.fluff': {
+    kind: 'fluff',
     size: 34,
-    palette: { body: '#9aa6c4', bodyDark: '#6a7592', glow: '#67e8f9', eye: '#ff5c7a', brush: '#4a5470' },
+    palette: { body: '#e8b07a', bodyDark: '#b97b48', glow: '#ffd166', eye: '#4b3024', tuft: '#f7d7a8' },
     themeOverrides: {
-      paper: { body: '#b9a887', bodyDark: '#8e7c5e', glow: '#2f7f74', eye: '#c2452f', brush: '#6d5a3e' },
+      paper: { body: '#c79a6a', bodyDark: '#9a6d42', glow: '#c48a1c', eye: '#4d3324', tuft: '#e8d0a8' },
     },
   },
-  'enemy.drone': {
-    kind: 'drone',
+  'enemy.flutter': {
+    kind: 'flutter',
     size: 30,
-    palette: { body: '#5b6482', bodyDark: '#39415a', glow: '#ff7a9c', eye: '#ff5c7a', rotor: '#9aa6c4' },
+    palette: { body: '#8fd8c7', bodyDark: '#4f9f95', glow: '#ff9fb8', eye: '#24403c', wing: '#d8fff2', beak: '#ffb703' },
     themeOverrides: {
-      paper: { body: '#a89474', bodyDark: '#7a6647', glow: '#c2452f', eye: '#a8321f', rotor: '#d8c29c' },
+      paper: { body: '#7fa58a', bodyDark: '#5d7f68', glow: '#c2452f', eye: '#2b2018', wing: '#d8efe0', beak: '#c48a1c' },
     },
   },
   'enemy.spitter': {
     kind: 'spitter',
     size: 36,
-    palette: { body: '#6fb3a4', bodyDark: '#4d8b7f', glow: '#a7f3d0', eye: '#ffce54', water: '#7ee3ff' },
+    palette: { body: '#9ccb7a', bodyDark: '#5f8f4a', glow: '#f2c14e', eye: '#3b2b20', seed: '#f2c14e', leaf: '#4f8f5a' },
     themeOverrides: {
-      paper: { body: '#7fa58a', bodyDark: '#5d7f68', glow: '#2f7f74', eye: '#c48a1c', water: '#3f8fb0' },
+      paper: { body: '#8fa878', bodyDark: '#647a4f', glow: '#c48a1c', eye: '#3b2b20', seed: '#c48a1c', leaf: '#5d7f68' },
     },
   },
   'enemy.brute': {
     kind: 'brute',
     size: 52,
-    palette: { body: '#6d7387', bodyDark: '#4a4f61', glow: '#ffb703', eye: '#ff5c7a', lid: '#8d93a8' },
+    palette: { body: '#8a7a68', bodyDark: '#584b3f', glow: '#ffd166', eye: '#33261e', shell: '#b9a184', moss: '#7fa05a' },
     themeOverrides: {
-      paper: { body: '#9b8a6d', bodyDark: '#75664c', glow: '#c48a1c', eye: '#b5382a', lid: '#c2ae8b' },
+      paper: { body: '#9b8a6d', bodyDark: '#75664c', glow: '#c48a1c', eye: '#3b2b20', shell: '#c2ae8b', moss: '#7f9a63' },
     },
   },
   'enemy.dart': {
     kind: 'dart',
     size: 30,
-    palette: { body: '#ff8a5c', bodyDark: '#b4522f', glow: '#ffd166', eye: '#67e8f9', wheel: '#33262a' },
+    palette: { body: '#f08a5d', bodyDark: '#a84f32', glow: '#ffd166', eye: '#3a241f', horn: '#fff1cf', hoof: '#4d3324' },
     themeOverrides: {
-      paper: { body: '#d08a5f', bodyDark: '#9b6238', glow: '#c48a1c', eye: '#2f7f74', wheel: '#4d4030' },
+      paper: { body: '#d08a5f', bodyDark: '#9b6238', glow: '#c48a1c', eye: '#3b2b20', horn: '#efe0bf', hoof: '#4d4030' },
     },
   },
   'enemy.guard': {
     kind: 'guard',
     size: 46,
-    palette: { body: '#8b93a8', plate: '#c9d3e6', bodyDark: '#5a6178', rivet: '#3a4155', eye: '#ffce54' },
+    palette: { body: '#7b8f7a', bodyDark: '#4e5f50', plate: '#c9d3b8', rivet: '#3a4a3d', eye: '#ffce54' },
     themeOverrides: {
-      paper: { body: '#a89a7f', plate: '#d8c9a8', bodyDark: '#7a6a52', rivet: '#4d4030', eye: '#b5382a' },
+      paper: { body: '#8f9b74', bodyDark: '#61704c', plate: '#d8c9a8', rivet: '#4d4030', eye: '#c48a1c' },
     },
   },
   'enemy.bomber': {
     kind: 'bomber',
     size: 30,
-    palette: { body: '#6b7f5a', bodyDark: '#46543a', core: '#ff5c7a', spark: '#ffd166', stripe: '#e8e0c0' },
+    palette: { body: '#e8a15c', bodyDark: '#a86632', core: '#ff6b6b', spark: '#ffd166', leaf: '#6f9a5a' },
     themeOverrides: {
-      paper: { body: '#8f9b74', bodyDark: '#61704c', core: '#c2452f', spark: '#c48a1c', stripe: '#efe6cf' },
+      paper: { body: '#d08a5f', bodyDark: '#9b6238', core: '#c2452f', spark: '#c48a1c', leaf: '#7f9a63' },
     },
   },
-  'enemy.brood': {
-    kind: 'brood',
+  'enemy.nester': {
+    kind: 'nester',
     size: 42,
-    palette: { body: '#7c6a9a', bodyDark: '#52456b', glass: '#b7e3ff', egg: '#ffd166', eye: '#ff5c7a' },
+    palette: { body: '#c99a6b', bodyDark: '#8f6340', nest: '#d8b77a', egg: '#fff1cf', eye: '#3b2b20' },
     themeOverrides: {
-      paper: { body: '#9b8a74', bodyDark: '#6f5f49', glass: '#bfe0d8', egg: '#c48a1c', eye: '#a8321f' },
+      paper: { body: '#b09470', bodyDark: '#7a6248', nest: '#d8c29c', egg: '#fff7e4', eye: '#3b2b20' },
     },
   },
-  'enemy.mender': {
-    kind: 'mender',
+  'enemy.glowcap': {
+    kind: 'glowcap',
     size: 34,
-    palette: { body: '#5aa9a0', bodyDark: '#3a7973', light: '#a7f3d0', cross: '#ffd166', eye: '#ffce54' },
+    palette: { body: '#c9b7e8', bodyDark: '#8a76b0', light: '#b7f7dc', spot: '#fff1cf', eye: '#3b2b20' },
     themeOverrides: {
-      paper: { body: '#7fa58a', bodyDark: '#5d7f68', light: '#d8efe0', cross: '#c48a1c', eye: '#b5382a' },
+      paper: { body: '#b7a6c9', bodyDark: '#7f6f94', light: '#d8efe0', spot: '#fff7e4', eye: '#3b2b20' },
     },
   },
   'enemy.mite': {
     kind: 'mite',
     size: 18,
-    palette: { body: '#c9d3e6', bodyDark: '#78839c', eye: '#ff5c7a', spark: '#ffd166' },
+    palette: { body: '#ffe1b8', bodyDark: '#d8b184', eye: '#3b2b20', spark: '#ffd166' },
     themeOverrides: {
-      paper: { body: '#d8c9a8', bodyDark: '#9b8a6d', eye: '#a8321f', spark: '#c48a1c' },
+      paper: { body: '#e8d0a8', bodyDark: '#b99a6d', eye: '#3b2b20', spark: '#c48a1c' },
     },
   },
   'enemy.boss': {
     kind: 'boss',
     size: 104,
-    palette: { body: '#39415a', bodyDark: '#242b40', glow: '#ff4d6d', core: '#ffd166', eye: '#ff2e55' },
+    palette: { body: '#7c8462', bodyDark: '#4c543c', glow: '#ffb86b', core: '#ffd166', eye: '#ffd166', horn: '#f0e3c4' },
     themeOverrides: {
-      paper: { body: '#6a5c49', bodyDark: '#493f31', glow: '#a8321f', core: '#c48a1c', eye: '#8f1f14' },
+      paper: { body: '#9a8f70', bodyDark: '#6b6048', glow: '#c2452f', core: '#c48a1c', eye: '#b07a2f', horn: '#efe0bf' },
     },
   },
 
   // ---------- 投射物 ----------
-  'proj.hairball': { kind: 'orb', size: 14, palette: { core: '#ffe6b8', glow: '#f9a826', edge: '#c97a34' } },
-  'proj.water': { kind: 'orb', size: 12, palette: { core: '#d8fbff', glow: '#7ee3ff', edge: '#2c8fb0' } },
-  'proj.ink': { kind: 'orb', size: 16, palette: { core: '#ffd0dc', glow: '#ff4d6d', edge: '#8c1f38' } },
-  'proj.generic': { kind: 'orb', size: 12, palette: { core: '#ffffff', glow: '#67e8f9', edge: '#2c8fb0' } },
+  'proj.yarn': { kind: 'orb', size: 14, palette: { core: '#ffe6b8', glow: '#f08a5d', edge: '#a84f32' } },
+  'proj.seed': { kind: 'orb', size: 12, palette: { core: '#fff3c4', glow: '#f2c14e', edge: '#8f6a1f' } },
+  'proj.spore': { kind: 'orb', size: 16, palette: { core: '#ffd0dc', glow: '#c9b7e8', edge: '#6f5a86' } },
+  'proj.generic': { kind: 'orb', size: 12, palette: { core: '#ffffff', glow: '#ffd08a', edge: '#a86a32' } },
 
   // ---------- 掉落 ----------
-  'pickup.xp': { kind: 'xp', size: 12, palette: { core: '#d9ffe6', glow: '#78e6a0', edge: '#2f8f5a' } },
-  'pickup.coin': { kind: 'coin', size: 13, palette: { core: '#fff3c4', glow: '#ffce54', edge: '#b07d12' } },
+  'pickup.xp': { kind: 'xp', size: 12, palette: { core: '#e6ffe9', glow: '#9be3a0', edge: '#3f8f5a' } },
+  'pickup.coin': { kind: 'coin', size: 13, palette: { core: '#fff3c4', glow: '#ffd166', edge: '#b07d12' } },
 
   // ---------- 陷阱 ----------
-  'trap.mouse': { kind: 'trap', size: 26, palette: { metal: '#c9d3e6', metalDark: '#78839c', glow: '#ffce54' } },
+  'trap.snare': { kind: 'trap', size: 26, palette: { metal: '#d8c9a8', metalDark: '#8f7a58', glow: '#ffd166' } },
 
   // ---------- 武器图标（React HUD 复用同一套绘制） ----------
-  'icon.hairball': { kind: 'glyph', glyph: 'hairball', size: 28, palette: { a: '#f9a826', b: '#ffe6b8', c: '#c97a34' } },
-  'icon.claw': { kind: 'glyph', glyph: 'claw', size: 28, palette: { a: '#ff9fb8', b: '#ffffff', c: '#c2452f' } },
-  'icon.hiss': { kind: 'glyph', glyph: 'hiss', size: 28, palette: { a: '#a7f3d0', b: '#ffffff', c: '#2f7f74' } },
-  'icon.laser': { kind: 'glyph', glyph: 'laser', size: 28, palette: { a: '#ff5c7a', b: '#ffe6b8', c: '#8c1f38' } },
-  'icon.tail': { kind: 'glyph', glyph: 'tail', size: 28, palette: { a: '#c4b5fd', b: '#ffffff', c: '#6d28d9' } },
-  'icon.trap': { kind: 'glyph', glyph: 'trap', size: 28, palette: { a: '#c9d3e6', b: '#ffffff', c: '#78839c' } },
-  'icon.paw': { kind: 'glyph', glyph: 'paw', size: 28, palette: { a: '#ffce54', b: '#ffffff', c: '#c97a34' } },
+  'icon.hairball': { kind: 'glyph', glyph: 'yarn', size: 28, palette: { a: '#f08a5d', b: '#ffe6b8', c: '#a84f32' } },
+  'icon.claw': { kind: 'glyph', glyph: 'mallet', size: 28, palette: { a: '#d8b184', b: '#fff1cf', c: '#8f6340' } },
+  'icon.hiss': { kind: 'glyph', glyph: 'horn', size: 28, palette: { a: '#ffd08a', b: '#fff7e4', c: '#c98a45' } },
+  'icon.laser': { kind: 'glyph', glyph: 'flashlight', size: 28, palette: { a: '#ffd166', b: '#fff7e4', c: '#8f6a1f' } },
+  'icon.tail': { kind: 'glyph', glyph: 'pinwheel', size: 28, palette: { a: '#9be3c3', b: '#fff7e4', c: '#3f8f7a' } },
+  'icon.trap': { kind: 'glyph', glyph: 'snare', size: 28, palette: { a: '#d8c9a8', b: '#fff7e4', c: '#8f7a58' } },
+  'icon.heart': { kind: 'glyph', glyph: 'heart', size: 28, palette: { a: '#ff9fb8', b: '#fff7e4', c: '#c2455a' } },
+  'icon.scarf': { kind: 'glyph', glyph: 'scarf', size: 28, palette: { a: '#e8a0a8', b: '#fff3e0', c: '#a85e6b' } },
+  'icon.glove': { kind: 'glyph', glyph: 'glove', size: 28, palette: { a: '#d8b184', b: '#fff1cf', c: '#8f6340' } },
+  'icon.band': { kind: 'glyph', glyph: 'band', size: 28, palette: { a: '#9be3c3', b: '#fff7e4', c: '#3f8f7a' } },
+  'icon.pouch': { kind: 'glyph', glyph: 'pouch', size: 28, palette: { a: '#c7a3d8', b: '#f7eaff', c: '#7d5a91' } },
+  'icon.candy': { kind: 'glyph', glyph: 'candy', size: 28, palette: { a: '#ffd08a', b: '#fff7e4', c: '#c98a45' } },
+  'icon.box': { kind: 'glyph', glyph: 'box', size: 28, palette: { a: '#9fb7c9', b: '#eaf4ff', c: '#5c7488' } },
+  'icon.soup': { kind: 'glyph', glyph: 'soup', size: 28, palette: { a: '#ffb37a', b: '#fff1d6', c: '#b56b3f' } },
+  'icon.bell': { kind: 'glyph', glyph: 'bell', size: 28, palette: { a: '#ffd166', b: '#fff7e4', c: '#a87c1f' } },
+  'icon.scope': { kind: 'glyph', glyph: 'scope', size: 28, palette: { a: '#9be3c3', b: '#fff7e4', c: '#3f8f7a' } },
 };
 
 export function getSprite(id) {
@@ -175,14 +188,14 @@ export function resolveSprite(id, themeId) {
 
 /** 武器弹道 → 投射物 sprite（换画风时只改这里或 sprite 定义）。 */
 export const WEAPON_PROJECTILE_SPRITE = {
-  hairball: 'proj.hairball',
-  trap: 'trap.mouse',
+  hairball: 'proj.yarn',
+  trap: 'trap.snare',
 };
 
 /** 敌人弹道 → 投射物 sprite。 */
 export const ENEMY_PROJECTILE_SPRITE = {
-  spitter: 'proj.water',
-  ironLung: 'proj.ink',
+  spitter: 'proj.seed',
+  rumble: 'proj.spore',
 };
 
 /** 武器 id → 图标 sprite id（数据驱动，新增武器时在这里登记）。 */
@@ -195,6 +208,19 @@ export const WEAPON_ICONS = {
   trap: 'icon.trap',
 };
 
+/** 用品 id → 图标 sprite id（用品图标与属性图标分开，避免都退化成同一个圆点）。 */
+export const ITEM_ICONS = {
+  collar: 'icon.scarf',
+  hook: 'icon.glove',
+  rubber: 'icon.band',
+  moonstone: 'icon.pouch',
+  catnip: 'icon.candy',
+  can: 'icon.box',
+  fishcan: 'icon.soup',
+  bell: 'icon.bell',
+  scope: 'icon.scope',
+};
+
 export const UI_ICONS = {
-  paw: 'icon.paw',
+  heart: 'icon.heart',
 };

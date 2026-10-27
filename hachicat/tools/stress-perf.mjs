@@ -64,7 +64,7 @@ await page.evaluate(() => {
 await page.waitForTimeout(4500);
 await page.evaluate(() => {
   for (let i = 0; i < 28; i++) {
-    window.__hachicat.spawn('sweeper', { x: -160 + (i % 7) * 48, y: -180 + Math.floor(i / 7) * 62 });
+    window.__hachicat.spawn('fluff', { x: -160 + (i % 7) * 48, y: -180 + Math.floor(i / 7) * 62 });
   }
   // 排除拾取物特效干扰，只压敌人绘制
   window.__hachicat.controller.game.world.pickups.length = 0;

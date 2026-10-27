@@ -9,9 +9,10 @@ export const COMMISSIONS = {
   hunt: {
     id: 'hunt',
     name: '讨伐委托',
-    client: '旧巷事务处',
-    area: '旧巷工作区',
-    brief: `清理 ${TOTAL_WAVES} 波异动生物，击退首领「铁肺」。`,
+    client: '小镇委托所',
+    area: '茸茸草原外缘',
+    brief: `完成 ${TOTAL_WAVES} 波讨伐，击退巨兽「隆隆」；沿途捡到的金币会一并结算。`,
+    danger: '中',
     /** 接单即付的底薪，失败也有；胜利再加完成奖金。 */
     basePay: 30,
     victoryBonus: 80,
@@ -31,7 +32,8 @@ export function getCommission(id = DEFAULT_COMMISSION) {
 }
 
 /**
- * 委托报酬 = 底薪 + 本局赚到的材料 + 胜利奖金。
+ * 委托报酬 = 底薪 + 沿途捡到的金币 + 完成奖金。
+ * 当前没有独立的材料货币；`earned` 就是本局击杀掉落的金币，
  * 只用于结算展示，不写回钱包，避免影响商店经济。
  */
 export function commissionPayout(commission, { moneyEarned = 0, victory = false } = {}) {

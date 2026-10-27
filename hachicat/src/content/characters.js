@@ -6,9 +6,9 @@ export const CHARACTERS = [
   {
     id: 'hachiware',
     name: '小八',
-    title: '温柔可靠的日常搭档',
-    desc: '皮糙肉厚，一出门就带着毛球弹。适合第一次闯巷子的猫。',
-    sprite: 'cat.hachiware',
+    title: '乐观可靠的朋友',
+    desc: '总是笑眯眯地鼓励大家，遇到麻烦会先站出来。身体结实，背着一袋毛线团，适合第一次接委托的人。',
+    sprite: 'char.hachiware',
     base: {
       maxHp: 120,
       speed: 170,
@@ -27,10 +27,10 @@ export const CHARACTERS = [
   },
   {
     id: 'chiikawa',
-    name: '吉伊',
-    title: '有点胆小却努力的冒险家',
-    desc: '跑得最快，靠磨爪贴身撕开一条路。血薄，别被围住。',
-    sprite: 'cat.chiikawa',
+    name: '吉伊卡哇',
+    title: '温柔又努力',
+    desc: '容易紧张，也会被吓哭，但答应下来的工作一定会认真做完。跑得快、出手也快，握紧小木槌就往前冲。',
+    sprite: 'char.chiikawa',
     base: {
       maxHp: 90,
       speed: 208,
@@ -50,9 +50,9 @@ export const CHARACTERS = [
   {
     id: 'usagi',
     name: '乌萨奇',
-    title: '精力充沛的自由行动派',
-    desc: '眼神像激光笔。远程点射贯穿一排，但腿脚不太利索。',
-    sprite: 'cat.usagi',
+    title: '自由自在的精力派',
+    desc: '胆子大、精力旺，常常先冲出去再说。看着不太靠谱，关键时刻却总能照出一条路。',
+    sprite: 'char.usagi',
     base: {
       maxHp: 96,
       speed: 158,

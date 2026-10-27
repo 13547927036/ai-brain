@@ -9,7 +9,7 @@ export default function ResultScreen({ controller, snap }) {
   const r = snap.result;
   if (!r) return null;
   const win = !!r.victory;
-  const payout = r.payout || { total: r.money };
+  const payout = r.payout || { base: 0, earned: r.money || 0, bonus: 0, total: r.money || 0 };
 
   return (
     <div className="overlay overlay--center" role="dialog" aria-modal="true" aria-label="结算">
@@ -26,7 +26,7 @@ export default function ResultScreen({ controller, snap }) {
           </div>
           <div className="result__stat">
             <b>{r.kills}</b>
-            <span>击杀</span>
+            <span>击退</span>
           </div>
           <div className="result__stat">
             <b>Lv.{r.level}</b>
@@ -46,8 +46,22 @@ export default function ResultScreen({ controller, snap }) {
           </div>
         </div>
 
+        <div className="result__payout">
+          <span>
+            基础报酬 <b>{payout.base}</b>
+          </span>
+          <span>
+            沿途收入 <b>{payout.earned}</b>
+          </span>
+          {win && (
+            <span>
+              完成奖金 <b>{payout.bonus}</b>
+            </span>
+          )}
+        </div>
+
         <p className="result__record">
-          评价 {r.rank || 'C'} · 最佳纪录 第 {snap.bestWave} 波
+          委托评价 {r.rank || 'C'} · 最佳纪录 第 {snap.bestWave} 波
           {win ? ' · 委托完成' : ''}
         </p>
 
@@ -61,10 +75,10 @@ export default function ResultScreen({ controller, snap }) {
           </button>
           <div className="result__row">
             <button className="btn btn--ghost" onClick={() => controller.showCharacters()}>
-              换只猫
+              换个搭档
             </button>
             <button className="btn btn--ghost" onClick={() => controller.showMenu()}>
-              主菜单
+              回主菜单
             </button>
           </div>
         </div>

@@ -21,8 +21,8 @@ export default function CharacterSelect({ controller, snap }) {
           <Icon name="arrowLeft" size={19} />
         </button>
         <div>
-          <h2 className="screen__title">接取{commission.name}</h2>
-          <p className="screen__sub">{commission.area} · 完成结算报酬</p>
+          <h2 className="screen__title">选择搭档</h2>
+          <p className="screen__sub">{commission.area} · 完成委托后结算报酬</p>
         </div>
       </header>
 
@@ -45,10 +45,11 @@ export default function CharacterSelect({ controller, snap }) {
                   <span className="char-card__name">{c.name}</span>
                   <span className="char-card__title">{c.title}</span>
                 </span>
+                <span className="char-card__desc">{c.desc}</span>
                 <span className="char-card__trait">{c.trait}</span>
                 <span className="char-card__meta">
                   <span className="char-card__weapon">
-                    <Icon name="sword" size={12} />
+                    <Icon name="sparkle" size={12} />
                     {weaponName(c.startWeapon)}
                   </span>
                   <span>生命 {c.base.maxHp}</span>

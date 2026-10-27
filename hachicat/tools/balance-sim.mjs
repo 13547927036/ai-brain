@@ -85,7 +85,7 @@ function botMove(w) {
       ax += (dx / d) * wgt * 2.6;
       ay += (dy / d) * wgt * 2.6;
     }
-    // 首领冲刺预警：垂直方向侧闪
+    // 讨伐目标冲刺预警：垂直方向侧闪
     if (e.isBoss && e.telegraph > 0 && d < 520) {
       const nx = -dy / d;
       const ny = dx / d;
@@ -208,7 +208,7 @@ function shopPlan(scenario, snap, build = 'all') {
     return { buys, rerolls, heal };
   }
 
-  // normal：武器优先，道具其次，残血治疗
+  // normal：装备优先，用品其次，残血喝汤
   if (healNow && snap.hp < snap.maxHp * 0.6) heal = true;
   const reserve = heal ? healPrice : 0;
   for (const { i, o } of weaponOffers) {
@@ -362,7 +362,7 @@ function runOne(character, seed, scenario, build = 'all', label = scenario) {
           healPaid = res.price ?? healPriceBefore;
         }
       }
-      // 正常玩家会立刻合成同名同等级武器
+      // 正常玩家会立刻整理同名同等级装备
       for (let s = 0; s < 6; s++) {
         const list = g.getSnapshot().shop?.synthesis || [];
         if (!list.length) break;
@@ -525,11 +525,11 @@ console.log('\n=== 汇总 ===');
 for (const [scenario, a] of Object.entries(agg)) {
   console.log(
     `${scenario.padEnd(15)} 胜率=${a.winRate}% 平均时长=${a.avgTime}s 平均等级=${a.avgLevel} ` +
-      `平均击杀=${a.avgKills} 平均受伤=${a.avgDamageTaken} 结束金币=${a.avgMoneyEnd} 总材料=${a.avgMoneyEarned} ` +
-      `均花=${a.avgShopSpent} 治疗=${a.avgHeals} 刷新=${a.avgRerolls} ` +
-      `预警/引信/召唤/维修/首领弹幕=${a.avgDashWarns}/${a.avgBombFuses}/${a.avgSummons}/${a.avgHealsGiven}/${a.avgBossBarrages}`
+      `平均击退=${a.avgKills} 平均受伤=${a.avgDamageTaken} 结束金币=${a.avgMoneyEnd} 沿途收入=${a.avgMoneyEarned} ` +
+      `均花=${a.avgShopSpent} 喝汤=${a.avgHeals} 换一批=${a.avgRerolls} ` +
+      `预警/引信/召唤/支援/讨伐目标弹幕=${a.avgDashWarns}/${a.avgBombFuses}/${a.avgSummons}/${a.avgHealsGiven}/${a.avgBossBarrages}`
   );
-  console.log('  波次: ' + a.waves.map((w) => `w${w.wave}(杀${w.kills}/伤${w.damageTaken}/收${w.earned}/花${w.shopSpent}/余${w.moneyEnd})`).join(' '));
+  console.log('  波次: ' + a.waves.map((w) => `w${w.wave}(击退${w.kills}/伤${w.damageTaken}/收${w.earned}/花${w.shopSpent}/余${w.moneyEnd})`).join(' '));
 }
 
 if (opts.json) {

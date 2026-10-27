@@ -5,7 +5,7 @@
 export const STAT_META = {
   maxHp: { label: '最大生命', kind: 'flat', icon: 'heart', decimals: 0 },
   speed: { label: '移动速度', kind: 'flat', icon: 'boot', decimals: 0 },
-  damageMul: { label: '伤害', kind: 'percent', icon: 'claw', decimals: 0 },
+  damageMul: { label: '伤害', kind: 'percent', icon: 'hammer', decimals: 0 },
   attackSpeedMul: { label: '攻击速度', kind: 'percent', icon: 'bolt', decimals: 0 },
   rangeMul: { label: '攻击范围', kind: 'percent', icon: 'target', decimals: 0 },
   pickup: { label: '拾取范围', kind: 'flat', icon: 'magnet', decimals: 0 },

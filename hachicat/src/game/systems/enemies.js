@@ -76,7 +76,7 @@ export function spawnEnemy(world, def, x, y, rng, opts = {}) {
     healAmount: def.healAmount || 6,
     healMax: def.healMax || 3,
     healPulse: 0,
-    // 首领
+    // 讨伐目标
     timers: { radial: 2.4, special: 6.2, spiral: 0, spiralAngle: 0 },
     radialWarn: 0,
     radialWarnMax: 0,
@@ -156,7 +156,7 @@ export function stepEnemies(world, dt) {
             angle: angle + spread,
             speed: e.defSpeed || 205,
             damage: (e.defBulletDamage || e.damage) * 1.15,
-            sprite: 'proj.water',
+            sprite: 'proj.seed',
             source: e.defId,
           });
         }
@@ -356,7 +356,7 @@ function stepSummoner(world, e, dt) {
   e.summonCd = e.summonCdMax;
 }
 
-/** 支援型：周期性治疗附近伤势最重的敌人（含自己），有目标数上限。 */
+/** 支援型：周期性回复附近伤势最重的敌人（含自己），有目标数上限。 */
 function stepSupport(world, e, dt) {
   e.healCd -= dt;
   if (e.healCd > 0) return;
@@ -500,7 +500,7 @@ function summonAdds(world, e) {
     const a = (i / Math.max(1, n)) * Math.PI * 2 + 0.4;
     const x = Math.max(30, Math.min(world.arena.w - 30, e.x + Math.cos(a) * 80));
     const y = Math.max(30, Math.min(world.arena.h - 30, e.y + Math.sin(a) * 80));
-    const def = scaleEnemy(ENEMY_BY_ID.drone, wave, false, false);
+    const def = scaleEnemy(ENEMY_BY_ID.flutter, wave, false, false);
     spawnEnemy(world, def, x, y, world.rng);
   }
   world.stats.summons = (world.stats.summons || 0) + n;

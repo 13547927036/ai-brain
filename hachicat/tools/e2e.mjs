@@ -121,7 +121,7 @@ await page.goto(BASE, { waitUntil: 'networkidle' });
 await page.waitForTimeout(500);
 await shot('01-menu');
 
-check('标题渲染', (await page.title()).includes('哈气猫'));
+check('标题渲染', (await page.title()).includes('吉伊卡哇'));
 check(
   '主菜单主按钮可见',
   await page.locator('[data-testid="start-game"]').isVisible()
@@ -151,7 +151,7 @@ await shot('02-characters');
 const cards = await page.locator('.char-card').count();
 check('角色卡恰好 3 张', cards === 3, `count=${cards}`);
 check('不存在第四个角色入口', (await page.locator('[data-testid="char-shadow"]').count()) === 0);
-check('选角页展示委托', (await page.locator('.screen__title').innerText()).includes('讨伐委托'));
+check('选角页展示搭档选择', (await page.locator('.screen__title').innerText()).includes('选择搭档'));
 
 /* ---------------- 角色形象：图片素材 ---------------- */
 const charArt = await page.evaluate(async () => {
@@ -195,11 +195,11 @@ const cardCopy = await page.locator('.char-card').evaluateAll((els) =>
   })
 );
 const cardNames = cardCopy.map((c) => c.name);
-check('选角页角色名与图片绑定一致', cardNames.join(',') === '小八,吉伊,乌萨奇', cardNames.join(','));
+check('选角页角色名与图片绑定一致', cardNames.join(',') === '小八,吉伊卡哇,乌萨奇', cardNames.join(','));
 check(
   '选角页角色描述与角色对应',
   cardCopy.map((c) => `${c.name}:${c.title}`).join('|') ===
-    '小八:温柔可靠的日常搭档|吉伊:有点胆小却努力的冒险家|乌萨奇:精力充沛的自由行动派',
+    '小八:乐观可靠的朋友|吉伊卡哇:温柔又努力|乌萨奇:自由自在的精力派',
   cardCopy.map((c) => `${c.name}:${c.title}`).join(' | ')
 );
 check(
@@ -243,11 +243,11 @@ check('初始武器 1 件', battle.weapons.length === 1, `weapons=${battle.weapo
 
 /* ---------------- 2.5 新怪物与预警 ---------------- */
 const roster = await page.evaluate(() => {
-  const ids = ['dart', 'guard', 'bomber', 'brood', 'mender', 'mite'];
+  const ids = ['dart', 'guard', 'bomber', 'nester', 'glowcap', 'mite'];
   const spawned = ids.map((id, i) =>
     window.__hachicat.spawn(id, { x: 62 + (i % 3) * 48, y: -104 + Math.floor(i / 3) * 64 })
   );
-  const elite = window.__hachicat.spawn('sweeper', { elite: true, x: -120, y: 96 });
+  const elite = window.__hachicat.spawn('fluff', { elite: true, x: -120, y: 96 });
   return { spawned, elite, list: window.__hachicat.enemies() };
 });
 check(
@@ -277,7 +277,7 @@ const dartFx = await page.evaluate(async () => {
   await new Promise((r) => setTimeout(r, 180));
   return window.__hachicat.enemies().find((x) => x.id === 'dart');
 });
-check('疾走快递进入突进预警', dartFx?.warnT > 0 || dartFx?.ai === 'dash', JSON.stringify(dartFx));
+check('冲撞兽进入突进预警', dartFx?.warnT > 0 || dartFx?.ai === 'dash', JSON.stringify(dartFx));
 
 const bomberFx = await page.evaluate(async () => {
   const g = window.__hachicat.controller.game;
@@ -291,7 +291,7 @@ const bomberFx = await page.evaluate(async () => {
   await new Promise((r) => setTimeout(r, 220));
   return window.__hachicat.enemies().find((x) => x.id === 'bomber');
 });
-check('漏电电池进入引信状态', bomberFx?.fuseT > 0, JSON.stringify(bomberFx));
+check('噗噗果进入引信状态', bomberFx?.fuseT > 0, JSON.stringify(bomberFx));
 
 await page.evaluate(() => {
   window.__hachicat.controller.game.world.enemies.length = 0;
@@ -366,7 +366,7 @@ check('敌人已刷新', alive.enemies > 0, `enemies=${alive.enemies}`);
 const bl = await layout();
 check('HUD 暂停键在屏内', bl.pause.x >= 0 && bl.pause.x + bl.pause.w <= bl.innerW, JSON.stringify(bl.pause));
 check('HUD 血条宽度正常', bl.hp.w > 200, `w=${bl.hp.w}`);
-check('HUD 武器栏在屏内', bl.weapons.y + bl.weapons.h <= bl.innerH, JSON.stringify(bl.weapons));
+check('HUD 装备栏在屏内', bl.weapons.y + bl.weapons.h <= bl.innerH, JSON.stringify(bl.weapons));
 check('无横向溢出（战斗中）', bl.scrollW <= bl.innerW + 1, `scrollW=${bl.scrollW}`);
 
 /* ---------------- 3. 升级 ---------------- */
@@ -409,7 +409,13 @@ const shop = await page.evaluate(() => window.__hachicat.state());
 check('清场后进入商店', shop.mode === 'shop', `mode=${shop.mode}`);
 check('商店 4 个商品', shop.shop?.offers.length === 4, `offers=${shop.shop?.offers.length}`);
 const buildTitle = await page.locator('.shop__build h3').innerText();
-check('商店展示武器槽位', buildTitle.includes('/6'), buildTitle);
+check('商店展示装备格', buildTitle.includes('/6'), buildTitle);
+const itemIcons = shop.shop.offers.filter((o) => o.type === 'item').map((o) => o.icon);
+check(
+  '补给点用品使用各自的图标',
+  itemIcons.length > 0 && itemIcons.every((id) => id.startsWith('icon.') && id !== 'icon.heart'),
+  itemIcons.join(',')
+);
 
 // 合成：走真实商店流程——刷出同名副本 → 买下 → 合成升一级
 await page.evaluate(() => window.__hachicat.money(9999));
@@ -476,7 +482,7 @@ check(
   afterBuy.money === moneyBeforeBuy - price0,
   'money=' + afterBuy.money + ' before=' + moneyBeforeBuy + ' price=' + price0
 );
-check('购买后商品标记已购', afterBuy.shop.offers[buyIndex].sold === true);
+check('购买后商品标记已买', afterBuy.shop.offers[buyIndex].sold === true);
 await shot('08-shop-bought');
 
 const hpBeforeHeal = 20;
@@ -493,11 +499,11 @@ await healBtn.click();
 await page.waitForTimeout(250);
 const afterHeal = await page.evaluate(() => window.__hachicat.state());
 check(
-  '治疗生效且不超上限',
+  '喝汤生效且不超上限',
   afterHeal.hp > hpBeforeHeal && afterHeal.hp <= afterHeal.maxHp,
   `${hpBeforeHeal} → ${afterHeal.hp}/${afterHeal.maxHp} (${healLabel})`
 );
-check('治疗扣款', afterHeal.money < moneyBeforeHeal, `${moneyBeforeHeal} → ${afterHeal.money}`);
+check('喝汤扣款', afterHeal.money < moneyBeforeHeal, `${moneyBeforeHeal} → ${afterHeal.money}`);
 
 await page.locator('[data-testid="next-wave"]').click();
 await page.waitForTimeout(1500);
@@ -505,7 +511,7 @@ const wave2 = await page.evaluate(() => window.__hachicat.state());
 check('进入第 2 波', wave2.mode === 'battle' && wave2.wave === 2, `wave=${wave2.wave}`);
 await shot('09-wave2');
 
-/* ---------------- 6. 首领 ---------------- */
+/* ---------------- 6. 讨伐目标 ---------------- */
 await page.evaluate(() => {
   const g = window.__hachicat.controller.game;
   g.world.player.stats.maxHp = 9999;
@@ -520,7 +526,7 @@ const stress = await page.evaluate(() => ({
 check('第 11 波至少 10 个敌人同屏', stress.enemies >= 10, `enemies=${stress.enemies}`);
 check(
   '第 11 波混入新怪物',
-  stress.ids.some((id) => ['dart', 'guard', 'bomber', 'brood', 'mender'].includes(id)),
+  stress.ids.some((id) => ['dart', 'guard', 'bomber', 'nester', 'glowcap'].includes(id)),
   stress.ids.join(',')
 );
 await shot('09b-wave11');
@@ -529,9 +535,9 @@ await page.evaluate(() => window.__hachicat.jumpWave(12));
 await page.waitForTimeout(3800);
 await shot('10-boss');
 const bossState = await page.evaluate(() => window.__hachicat.state());
-check('首领波触发', bossState.wave === 12 && bossState.bossWave === true);
-check('首领血条出现', !!bossState.boss, `boss=${JSON.stringify(bossState.boss)}`);
-check('首领血条 DOM 可见', await page.locator('.hud__boss').isVisible());
+check('讨伐目标波触发', bossState.wave === 12 && bossState.bossWave === true);
+check('讨伐目标血条出现', !!bossState.boss, `boss=${JSON.stringify(bossState.boss)}`);
+check('讨伐目标血条 DOM 可见', await page.locator('.hud__boss').isVisible());
 const bossFx = await page.evaluate(() => {
   const g = window.__hachicat.controller.game;
   const b = g.world.boss;
@@ -543,7 +549,7 @@ const bossFx = await page.evaluate(() => {
   };
 });
 check(
-  '首领是持久战且带弹幕 / 冲刺预警',
+  '讨伐目标是持久战且带弹幕 / 冲刺预警',
   bossFx.maxHp >= 8000 && (bossFx.radialWarn > 0 || bossFx.telegraph > 0 || bossFx.bullets > 0),
   JSON.stringify(bossFx)
 );
@@ -552,7 +558,7 @@ check(
 await page.evaluate(() => window.__hachicat.killBoss());
 await page.waitForTimeout(900);
 const victory = await page.evaluate(() => window.__hachicat.state());
-check('击杀首领后结算', victory.mode === 'result', `mode=${victory.mode}`);
+check('击退讨伐目标后结算', victory.mode === 'result', `mode=${victory.mode}`);
 check('结算为胜利', victory.result?.victory === true);
 check('最佳波次已保存', victory.bestWave === 12, `best=${victory.bestWave}`);
 check(
@@ -591,16 +597,16 @@ check(
 await shot('12-defeat');
 
 /* ---------------- 8. 主题与存档 ---------------- */
-await page.locator('text=主菜单').click();
+await page.locator('text=回主菜单').click();
 await page.waitForTimeout(300);
-await page.locator('.segmented__btn', { hasText: '纸片白日' }).click();
+await page.locator('.segmented__btn', { hasText: '纸片日常' }).click();
 await page.waitForTimeout(300);
 const theme = await page.evaluate(() => ({
   theme: document.documentElement.dataset.theme,
   bg: getComputedStyle(document.body).backgroundColor,
   stored: JSON.parse(localStorage.getItem('hachicat.settings.v1') || '{}'),
 }));
-check('主题切到纸片白日', theme.theme === 'paper', theme.bg);
+check('主题切到纸片日常', theme.theme === 'paper', theme.bg);
 check('主题已持久化', theme.stored.theme === 'paper');
 await shot('13-paper-menu');
 

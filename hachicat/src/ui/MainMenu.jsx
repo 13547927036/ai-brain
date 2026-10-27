@@ -17,7 +17,7 @@ export default function MainMenu({ controller, snap }) {
           最佳 第 {best} 波
         </span>
         <span className="chip">
-          <Icon name="skull" size={13} />
+          <Icon name="clock" size={13} />
           {snap.runs} 局
         </span>
         <button
@@ -34,9 +34,17 @@ export default function MainMenu({ controller, snap }) {
           <SpriteIcon spriteId={CHARACTERS[0].sprite} size={186} themeId={snap.themeId} />
           <span className="menu__stamp">{commission.name}</span>
         </div>
-        <h1 className="brand__title">哈气猫</h1>
-        <p className="brand__en">HACHICAT</p>
-        <p className="brand__sub">接一单讨伐，赚够这个月的猫粮</p>
+        <h1 className="brand__title">吉伊卡哇</h1>
+        <p className="brand__en">CHIIKAWA FAN GAME</p>
+        <p className="brand__sub">接一份讨伐委托，赚取生活费与想要的东西</p>
+        <p className="brand__note">非官方同人作品 · 与原作者及版权方无关</p>
+        <div className="menu__brief">
+          <div className="menu__brief-head">
+            <span>{commission.client} · {commission.area}</span>
+            <span className="menu__danger">危险度 {commission.danger}</span>
+          </div>
+          <p className="menu__brief-text">{commission.brief}</p>
+        </div>
       </div>
 
       <div className="menu__actions">
@@ -56,7 +64,7 @@ export default function MainMenu({ controller, snap }) {
           data-testid="start-game"
           onClick={() => controller.showCharacters()}
         >
-          <Icon name="paw" size={20} />
+          <Icon name="heart" size={20} />
           接取{commission.name}
         </button>
 
@@ -75,7 +83,7 @@ export default function MainMenu({ controller, snap }) {
           </div>
         </div>
 
-        <p className="menu__hint">拖动屏幕移动 · 武器自动开火 · 每波结束逛商店</p>
+        <p className="menu__hint">拖动屏幕移动 · 攻击会自动进行 · 每波结束在补给点歇脚</p>
       </div>
     </div>
   );

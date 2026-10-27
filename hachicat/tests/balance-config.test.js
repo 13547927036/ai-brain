@@ -9,14 +9,14 @@ import { weaponOfferPrice, weaponCopyPrice, healPrice, rerollPrice, xpForLevel, 
 import { createRng } from '../src/game/rng.js';
 import { createWorld } from '../src/game/world.js';
 
-test('怪物阵容：9 种普通怪 + 召唤物 + 首领，行为类型齐全', () => {
+test('怪物阵容：9 种普通怪 + 召唤物 + 讨伐目标，行为类型齐全', () => {
   const normal = ENEMY_LIST.filter((e) => !e.summonOnly);
   assert.ok(normal.length >= 8 && normal.length <= 10, `普通怪数量 ${normal.length} 不在 8–10`);
   const ais = new Set([...ENEMY_LIST, ...Object.values(BOSSES)].map((e) => e.ai));
   for (const ai of ['chase', 'weave', 'shooter', 'dash', 'bomber', 'summoner', 'support', 'boss']) {
     assert.ok(ais.has(ai), `缺少行为类型 ${ai}`);
   }
-  assert.ok(BOSSES.ironLung, '缺少首领');
+  assert.ok(BOSSES.rumble, '缺少讨伐目标');
   assert.ok(ENEMY_BY_ID.guard.ward, '缺少减伤型敌人');
   assert.ok(ENEMY_BY_ID.mite.summonOnly, '召唤物应标记 summonOnly');
 
@@ -28,7 +28,7 @@ test('怪物阵容：9 种普通怪 + 召唤物 + 首领，行为类型齐全', 
 });
 
 test('新怪物按波次逐步登场，不会开局堆机制', () => {
-  const debut = { dart: 4, guard: 5, bomber: 6, brood: 7, mender: 8 };
+  const debut = { dart: 4, guard: 5, bomber: 6, nester: 7, glowcap: 8 };
   for (const [id, wave] of Object.entries(debut)) {
     assert.ok(WAVES[wave - 1].pool[id] > 0, `${id} 应在第 ${wave} 波出现`);
     for (let n = 1; n < wave; n++) {
@@ -94,10 +94,10 @@ test('道具价格处于前期可负担、后期需取舍的区间', () => {
   }
 });
 
-test('治疗与刷新价格随进度增长，刷新不能零成本', () => {
+test('喝汤与换一批价格随进度增长，换一批不能零成本', () => {
   const low = { stats: { maxHp: 100 } };
   const high = { stats: { maxHp: 220 } };
-  assert.ok(healPrice(high) > healPrice(low), '高生命上限的治疗应更贵');
+  assert.ok(healPrice(high) > healPrice(low), '高生命上限的喝汤应更贵');
 
   const shop = { rerolls: 0 };
   const seq = [];
@@ -106,7 +106,7 @@ test('治疗与刷新价格随进度增长，刷新不能零成本', () => {
     shop.rerolls += 1;
   }
   assert.deepEqual(seq, [8, 11, 17, 26]);
-  assert.ok(seq[0] > 0, '刷新必须有成本');
+  assert.ok(seq[0] > 0, '换一批必须有成本');
 });
 
 test('经验曲线单调递增且开局为 16', () => {
@@ -124,7 +124,7 @@ test('委托：失败收益低于胜利收益，且失败仍有底薪', () => {
   const fail = commissionPayout(c, { moneyEarned: 300, victory: false });
   const win = commissionPayout(c, { moneyEarned: 300, victory: true });
   assert.equal(fail.base, c.basePay);
-  assert.ok(fail.total > 0, '失败仍应有底薪与材料');
+  assert.ok(fail.total > 0, '失败仍应有底薪与沿途收入');
   assert.ok(win.total > fail.total, '胜利收益必须高于失败');
 });
 

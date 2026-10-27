@@ -9,7 +9,7 @@ import { createWorld } from '../src/game/world.js';
 /** 三个主角：标识、名称、图片必须一一对应，错一处就算失败。 */
 const EXPECTED = [
   { id: 'hachiware', name: '小八', image: './chars/hachiware.png' },
-  { id: 'chiikawa', name: '吉伊', image: './chars/chiikawa.png' },
+  { id: 'chiikawa', name: '吉伊卡哇', image: './chars/chiikawa.png' },
   { id: 'usagi', name: '乌萨奇', image: './chars/usagi.png' },
 ];
 const EXPECTED_IDS = EXPECTED.map((e) => e.id);
@@ -60,23 +60,23 @@ test('三个角色的标识、名称与图片一一对应，不会错位', () =>
   for (const e of EXPECTED) {
     const c = CHARACTER_BY_ID[e.id];
     assert.ok(c, `${e.id} 不存在`);
-    assert.equal(c.sprite, `cat.${e.id}`);
+    assert.equal(c.sprite, `char.${e.id}`);
     const sprite = getSprite(c.sprite);
     assert.ok(sprite, `${c.name} 的精灵 ${c.sprite} 未注册`);
     assert.equal(sprite.kind, 'image', `${c.name} 应使用图片素材`);
     assert.equal(sprite.image, e.image, `${c.name} 绑定的图片与名称不匹配`);
   }
-  const images = EXPECTED.map((e) => SPRITES[`cat.${e.id}`].image);
+  const images = EXPECTED.map((e) => SPRITES[`char.${e.id}`].image);
   assert.equal(new Set(images).size, 3, '三个角色不能共用同一张图片');
 });
 
 test('三个角色的描述与当前形象一致，旧设定文案已清除', () => {
   const TITLES = {
-    hachiware: '温柔可靠的日常搭档',
-    chiikawa: '有点胆小却努力的冒险家',
-    usagi: '精力充沛的自由行动派',
+    hachiware: '乐观可靠的朋友',
+    chiikawa: '温柔又努力',
+    usagi: '自由自在的精力派',
   };
-  const STALE = ['巷口的老大', '屋顶的影子', '冷柜上的白猫'];
+  const STALE = ['巷口的老大', '屋顶的影子', '冷柜上的白猫', '温柔可靠的日常搭档', '有点胆小却努力的冒险家', '精力充沛的自由行动派'];
   for (const e of EXPECTED) {
     const c = CHARACTER_BY_ID[e.id];
     assert.equal(c.title, TITLES[e.id], `${c.name} 的角色描述不符`);
@@ -89,13 +89,14 @@ test('三个角色的描述与当前形象一致，旧设定文案已清除', ()
   assert.equal(CHARACTERS.some((c) => STALE.includes(c.title)), false, '存在旧描述残留');
 });
 
-test('角色位图恰好三个，且没有残留其它猫素材', () => {
-  const cats = Object.keys(SPRITES).filter((k) => k.startsWith('cat.'));
-  assert.deepEqual(cats.sort(), EXPECTED_IDS.map((id) => 'cat.' + id).sort());
-  assert.equal(SPRITES['cat.shadow'], undefined);
-  assert.equal(SPRITES['cat.ginger'], undefined);
-  assert.equal(SPRITES['cat.soot'], undefined);
-  assert.equal(SPRITES['cat.frost'], undefined);
+test('角色位图恰好三个，且没有残留其它角色素材', () => {
+  const chars = Object.keys(SPRITES).filter((k) => k.startsWith('char.'));
+  assert.deepEqual(chars.sort(), EXPECTED_IDS.map((id) => 'char.' + id).sort());
+  assert.equal(Object.keys(SPRITES).some((k) => k.startsWith('cat.')), false, '仍有 cat.* 旧素材');
+  assert.equal(SPRITES['char.shadow'], undefined);
+  assert.equal(SPRITES['char.ginger'], undefined);
+  assert.equal(SPRITES['char.soot'], undefined);
+  assert.equal(SPRITES['char.frost'], undefined);
 });
 
 test('三张角色图片都存在、是带透明通道的 PNG', () => {

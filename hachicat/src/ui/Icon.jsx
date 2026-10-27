@@ -1,11 +1,16 @@
 import React from 'react';
 
-const FILLED = new Set(['star', 'burst', 'paw', 'coin', 'clover', 'play']);
+const FILLED = new Set(['star', 'burst', 'coin', 'clover', 'play']);
 
 const PATHS = {
   heart: <path d="M12 20.5S4.5 16 4.5 10.4A3.9 3.9 0 0 1 12 8a3.9 3.9 0 0 1 7.5 2.4c0 5.6-7.5 10.1-7.5 10.1z" />,
   boot: <path d="M6 4h5v6.5l6 3.2a2.6 2.6 0 0 1-1.2 4.9H6z" />,
-  claw: <path d="M6.5 19 9 5M11.5 19l1.8-14M16.5 19l2.2-13" />,
+  hammer: (
+    <>
+      <path d="M4.5 9.5 9 5l4 4-4.5 4.5z" />
+      <path d="m9.5 11.5 9 9M15 17l2-2" />
+    </>
+  ),
   bolt: <path d="M13 2.5 5 14h6l-1 7.5L18 10h-6z" />,
   target: (
     <>
@@ -71,13 +76,6 @@ const PATHS = {
       <path d="M8 5.5H5.5v2A3 3 0 0 0 8 10.4M16 5.5h2.5v2a3 3 0 0 1-2.5 2.9M12 13v4M8.5 20h7" />
     </>
   ),
-  skull: (
-    <>
-      <path d="M5.5 11a6.5 6.5 0 0 1 13 0v3.4a2.2 2.2 0 0 1-2.2 2.2H13v2.4h-2v-2.4H7.7a2.2 2.2 0 0 1-2.2-2.2z" />
-      <circle cx="9.5" cy="11" r="1.4" />
-      <circle cx="14.5" cy="11" r="1.4" />
-    </>
-  ),
   refresh: (
     <>
       <path d="M19 12a7 7 0 1 1-2.1-5" />
@@ -85,15 +83,6 @@ const PATHS = {
     </>
   ),
   check: <path d="M5 12.5 10 17l9-10" />,
-  paw: (
-    <>
-      <ellipse cx="12" cy="15" rx="4.2" ry="3.6" />
-      <ellipse cx="6.6" cy="10.6" rx="2.1" ry="2.7" />
-      <ellipse cx="10.6" cy="7.6" rx="2.1" ry="2.8" />
-      <ellipse cx="15" cy="7.8" rx="2.1" ry="2.8" />
-      <ellipse cx="18.2" cy="11.4" rx="2" ry="2.6" />
-    </>
-  ),
   wave: <path d="M3 9.5c2.6-3 5.2-3 7.8 0s5.2 3 7.8 0M3 15c2.6-3 5.2-3 7.8 0s5.2 3 7.8 0" />,
   clock: (
     <>
@@ -105,12 +94,6 @@ const PATHS = {
     <>
       <path d="M5 8.5h14l-1.2 10.2a2 2 0 0 1-2 1.8H8.2a2 2 0 0 1-2-1.8z" />
       <path d="M9 8.5V7a3 3 0 0 1 6 0v1.5" />
-    </>
-  ),
-  sword: (
-    <>
-      <path d="M14 4h6v6l-9 9-6-6z" />
-      <path d="M8.5 15.5 5 19M4 15l5 5" />
     </>
   ),
   sparkle: <path d="M12 3l1.7 5.3L19 10l-5.3 1.7L12 17l-1.7-5.3L5 10l5.3-1.7z" />,
@@ -134,7 +117,7 @@ export default function Icon({ name, size = 20, strokeWidth = 1.8, className = '
       focusable="false"
       {...rest}
     >
-      {PATHS[name] || PATHS.paw}
+      {PATHS[name] || PATHS.heart}
     </svg>
   );
 }

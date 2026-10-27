@@ -5,7 +5,7 @@
  *   chase     直线追击
  *   weave     蛇形追击
  *   shooter   保持距离并发射投射物
- *   boss      首领（多阶段）
+ *   boss      讨伐目标（多阶段）
  *   dash      预警后高速突进
  *   bomber    贴近后预警自爆
  *   summoner  保持距离，周期性召唤弱小敌人
@@ -15,9 +15,9 @@
  */
 export const ENEMY_LIST = [
   {
-    id: 'sweeper',
-    name: '扫地机',
-    sprite: 'enemy.sweeper',
+    id: 'fluff',
+    name: '蓬蓬兽',
+    sprite: 'enemy.fluff',
     radius: 15,
     hp: 16,
     speed: 52,
@@ -27,12 +27,12 @@ export const ENEMY_LIST = [
     armor: 0,
     knockbackResist: 0.15,
     ai: 'chase',
-    desc: '清扫巷子的第一台机器，撞上来会掉血。',
+    desc: '圆滚滚的蓬蓬兽，被惊动后会一头撞过来。',
   },
   {
-    id: 'drone',
-    name: '吸尘无人机',
-    sprite: 'enemy.drone',
+    id: 'flutter',
+    name: '飘飘鸟',
+    sprite: 'enemy.flutter',
     radius: 12,
     hp: 10,
     speed: 92,
@@ -44,11 +44,11 @@ export const ENEMY_LIST = [
     ai: 'weave',
     weaveAmp: 46,
     weaveFreq: 2.4,
-    desc: '左右摇摆地冲过来，速度很快。',
+    desc: '飘在半空的小鸟，左右摇晃着靠近。',
   },
   {
     id: 'spitter',
-    name: '喷水壶',
+    name: '喷籽花',
     sprite: 'enemy.spitter',
     radius: 16,
     hp: 24,
@@ -63,11 +63,11 @@ export const ENEMY_LIST = [
     fireCd: 2.4,
     bulletSpeed: 230,
     bulletDamage: 8,
-    desc: '远远地朝你喷水，会保持距离。',
+    desc: '鼓着腮帮的喷籽花，会远远吐出种子；看到种子就侧移。',
   },
   {
     id: 'brute',
-    name: '垃圾桶怪',
+    name: '壳壳兽',
     sprite: 'enemy.brute',
     radius: 23,
     hp: 54,
@@ -78,13 +78,13 @@ export const ENEMY_LIST = [
     armor: 2,
     knockbackResist: 0.72,
     ai: 'chase',
-    desc: '又慢又硬的大家伙，撞一下很痛。',
+    desc: '背着厚壳慢慢走，撞一下很痛。',
   },
 
   // ---------- 第 4 波起：突进 ----------
   {
     id: 'dart',
-    name: '疾走快递',
+    name: '冲撞兽',
     sprite: 'enemy.dart',
     radius: 13,
     hp: 20,
@@ -100,13 +100,13 @@ export const ENEMY_LIST = [
     dashSpeed: 510,
     dashTime: 0.28,
     dashCd: 2.9,
-    desc: '先刹车亮灯，再沿直线猛冲；看到预警就侧移。',
+    desc: '先低头刨地，再沿直线猛冲；看到预警就侧移。',
   },
 
   // ---------- 第 5 波起：减伤 ----------
   {
     id: 'guard',
-    name: '铁皮箱',
+    name: '铁甲虫',
     sprite: 'enemy.guard',
     radius: 19,
     hp: 52,
@@ -118,13 +118,13 @@ export const ENEMY_LIST = [
     knockbackResist: 0.55,
     ai: 'chase',
     ward: { kind: 'ranged', reduction: 0.55, minDistance: 120 },
-    desc: '正面焊着铁皮，远程打上去会被弹开；贴身或陷阱更有效。',
+    desc: '正面壳很硬，远处打上去会被弹开；贴身或陷阱更有效。',
   },
 
   // ---------- 第 6 波起：自爆 ----------
   {
     id: 'bomber',
-    name: '漏电电池',
+    name: '噗噗果',
     sprite: 'enemy.bomber',
     radius: 14,
     hp: 28,
@@ -140,14 +140,14 @@ export const ENEMY_LIST = [
     blastRadius: 88,
     blastDamage: 20,
     fuseCd: 2.4,
-    desc: '贴近后开始漏电闪烁，约 1.1 秒后爆炸；可以提前打掉，也可以拉开。',
+    desc: '生气时会鼓起来，约 1.1 秒后炸开；可以提前打掉，也可以拉开。',
   },
 
   // ---------- 第 7 波起：召唤 ----------
   {
-    id: 'brood',
-    name: '孵化箱',
-    sprite: 'enemy.brood',
+    id: 'nester',
+    name: '巢巢兽',
+    sprite: 'enemy.nester',
     radius: 20,
     hp: 50,
     speed: 34,
@@ -162,14 +162,14 @@ export const ENEMY_LIST = [
     summonCount: 2,
     summonMax: 4,
     summonId: 'mite',
-    desc: '躲在后方不断放出螺丝崽；同屏召唤有上限，优先拆掉它。',
+    desc: '躲在后方孵小绒球；同屏召唤有上限，优先拆掉它。',
   },
 
   // ---------- 第 8 波起：支援 ----------
   {
-    id: 'mender',
-    name: '维修灯',
-    sprite: 'enemy.mender',
+    id: 'glowcap',
+    name: '荧光菇',
+    sprite: 'enemy.glowcap',
     radius: 15,
     hp: 36,
     speed: 44,
@@ -184,13 +184,13 @@ export const ENEMY_LIST = [
     healAmount: 6,
     healCd: 1.8,
     healMax: 3,
-    desc: '举着焊灯给周围机器补血；不处理会让整群敌人变耐打。',
+    desc: '散发着柔光的蘑菇，会给周围怪物回血；不处理会让整群更耐打。',
   },
 
   // ---------- 召唤物（不掉落） ----------
   {
     id: 'mite',
-    name: '螺丝崽',
+    name: '小绒球',
     sprite: 'enemy.mite',
     radius: 8,
     hp: 7,
@@ -202,17 +202,17 @@ export const ENEMY_LIST = [
     knockbackResist: 0,
     ai: 'chase',
     summonOnly: true,
-    desc: '孵化箱掉出来的小螺丝，数量有上限，不掉金币和经验。',
+    desc: '巢巢兽孵出的小绒球，数量有上限，不掉金币和经验。',
   },
 ];
 
 export const ENEMY_BY_ID = Object.fromEntries(ENEMY_LIST.map((e) => [e.id, e]));
 
 export const BOSSES = {
-  ironLung: {
-    id: 'ironLung',
-    name: '铁肺',
-    title: '第 12 波 · 首领',
+  rumble: {
+    id: 'rumble',
+    name: '隆隆',
+    title: '第 12 波 · 讨伐目标',
     sprite: 'enemy.boss',
     radius: 46,
     hp: 9000,
@@ -223,7 +223,7 @@ export const BOSSES = {
     armor: 5,
     knockbackResist: 1,
     ai: 'boss',
-    desc: '巷子尽头的巨型吸尘器，吸口里亮着不祥的红光。',
+    desc: '平时在山谷里打盹的巨大生物，被吵醒后会横冲直撞。它没有恶意，只是现在很危险。',
   },
 };
 

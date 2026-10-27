@@ -70,7 +70,7 @@ export function spawnEnemyBullet(world, opts) {
     radius: opts.radius ?? 7,
     damage: opts.damage,
     ttl: opts.ttl ?? 5,
-    sprite: opts.sprite || 'proj.water',
+    sprite: opts.sprite || 'proj.generic',
     source: opts.source || 'bullet',
     spin: 0,
   });

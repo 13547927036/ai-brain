@@ -22,7 +22,7 @@ function step(w, seconds, dt = 1 / 60) {
   for (let i = 0; i < n; i++) stepEnemies(w, dt);
 }
 
-test('疾走快递：先预警锁定方向，再高速突进', () => {
+test('冲撞兽：先预警锁定方向，再高速突进', () => {
   const w = makeWorld(2);
   const p = w.player;
   const e = spawnEnemy(w, scaleEnemy(ENEMY_BY_ID.dart, 4), p.x + 250, p.y, w.rng);
@@ -42,7 +42,7 @@ test('疾走快递：先预警锁定方向，再高速突进', () => {
   assert.ok(Math.abs(e.x - x1) > 60, `突进位移过小：${Math.abs(e.x - x1).toFixed(1)}`);
 });
 
-test('铁皮箱：远距离弹道 / 射线减伤，贴身与陷阱不打折', () => {
+test('铁甲虫：远距离弹道 / 射线减伤，贴身与陷阱不打折', () => {
   const w = makeWorld(3);
   const p = w.player;
 
@@ -66,7 +66,7 @@ test('铁皮箱：远距离弹道 / 射线减伤，贴身与陷阱不打折', ()
   assert.equal(trapLoss, meleeLoss, '陷阱应与近战同样结算');
 });
 
-test('漏电电池：引信结束后爆炸伤害玩家，自爆不掉金币', () => {
+test('噗噗果：引信结束后爆炸伤害玩家，自爆不掉金币', () => {
   const w = makeWorld(4);
   const p = w.player;
   p.x = 400;
@@ -87,15 +87,15 @@ test('漏电电池：引信结束后爆炸伤害玩家，自爆不掉金币', ()
   assert.equal(w.pickups.filter((it) => it.kind === 'xp').length, 0, '自爆不应掉经验');
 });
 
-test('孵化箱：召唤有单体上限，且不突破本波同屏上限', () => {
+test('巢巢兽：召唤有单体上限，且不突破本波同屏上限', () => {
   const w = makeWorld(5);
   const p = w.player;
-  const e = spawnEnemy(w, scaleEnemy(ENEMY_BY_ID.brood, 7), p.x + 200, p.y, w.rng);
+  const e = spawnEnemy(w, scaleEnemy(ENEMY_BY_ID.nester, 7), p.x + 200, p.y, w.rng);
   e.summonCd = 0;
 
   stepEnemies(w, 1 / 60);
   const mites = () => w.enemies.filter((x) => x.summonedBy === e.id);
-  assert.equal(mites().length, 2, '第一次应召唤 2 只螺丝崽');
+  assert.equal(mites().length, 2, '第一次应召唤 2 只小绒球');
   assert.ok(w.stats.summons >= 2, '应记录召唤次数');
 
   for (let i = 0; i < 12; i++) {
@@ -110,11 +110,11 @@ test('孵化箱：召唤有单体上限，且不突破本波同屏上限', () =>
   assert.equal(mite.coin, 0);
 });
 
-test('维修灯：治疗附近伤势最重的敌人，不超过生命上限', () => {
+test('荧光菇：回复附近伤势最重的敌人，不超过生命上限', () => {
   const w = makeWorld(6);
   const p = w.player;
-  const mender = spawnEnemy(w, scaleEnemy(ENEMY_BY_ID.mender, 8), p.x + 160, p.y, w.rng);
-  const ally = spawnEnemy(w, scaleEnemy(ENEMY_BY_ID.sweeper, 8), p.x + 200, p.y + 20, w.rng);
+  const mender = spawnEnemy(w, scaleEnemy(ENEMY_BY_ID.glowcap, 8), p.x + 160, p.y, w.rng);
+  const ally = spawnEnemy(w, scaleEnemy(ENEMY_BY_ID.fluff, 8), p.x + 200, p.y + 20, w.rng);
   ally.hp = 1;
   ally.speed = 0; // 固定位置，排除走位影响
   mender.healCd = 0;
@@ -132,11 +132,11 @@ test('维修灯：治疗附近伤势最重的敌人，不超过生命上限', ()
   assert.ok(ally.hp <= ally.maxHp, '治疗不应超过生命上限');
 });
 
-test('首领：环形弹幕先预警再发射', () => {
+test('讨伐目标：环形弹幕先预警再发射', () => {
   const w = makeWorld(7);
   w.waveIndex = 12;
   const p = w.player;
-  const boss = spawnEnemy(w, scaleEnemy(BOSSES.ironLung, 12, true), p.x + 300, p.y, w.rng);
+  const boss = spawnEnemy(w, scaleEnemy(BOSSES.rumble, 12, true), p.x + 300, p.y, w.rng);
   boss.timers.radial = 0;
   boss.timers.special = 999;
 
@@ -149,15 +149,15 @@ test('首领：环形弹幕先预警再发射', () => {
   assert.ok(w.stats.bossBarrages > 0, '应记录首领弹幕次数');
 });
 
-test('首领召唤不会突破同屏上限', () => {
+test('讨伐目标召唤不会突破同屏上限', () => {
   const w = makeWorld(8);
   w.waveIndex = 12;
   w.waveMaxAlive = 6;
   const p = w.player;
   for (let i = 0; i < 5; i++) {
-    spawnEnemy(w, scaleEnemy(ENEMY_BY_ID.sweeper, 12), 40 + i * 20, 40, w.rng);
+    spawnEnemy(w, scaleEnemy(ENEMY_BY_ID.fluff, 12), 40 + i * 20, 40, w.rng);
   }
-  const boss = spawnEnemy(w, scaleEnemy(BOSSES.ironLung, 12, true), p.x + 300, p.y, w.rng);
+  const boss = spawnEnemy(w, scaleEnemy(BOSSES.rumble, 12, true), p.x + 300, p.y, w.rng);
   assert.equal(w.enemies.length, 6);
   boss.hp = boss.maxHp * 0.5;
   boss.phase = 2;
@@ -170,8 +170,8 @@ test('首领召唤不会突破同屏上限', () => {
 });
 
 test('精英缩放：更高生命 / 伤害 / 奖励，并保留本体 AI', () => {
-  const normal = scaleEnemy(ENEMY_BY_ID.sweeper, 7, false, false);
-  const elite = scaleEnemy(ENEMY_BY_ID.sweeper, 7, false, true);
+  const normal = scaleEnemy(ENEMY_BY_ID.fluff, 7, false, false);
+  const elite = scaleEnemy(ENEMY_BY_ID.fluff, 7, false, true);
   assert.equal(elite.elite, true);
   assert.equal(normal.elite, false);
   assert.ok(elite.hp > normal.hp);

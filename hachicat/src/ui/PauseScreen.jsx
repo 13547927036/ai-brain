@@ -7,12 +7,12 @@ export default function PauseScreen({ controller, snap }) {
     <div className="overlay overlay--center" role="dialog" aria-modal="true" aria-label="暂停">
       <div className="pause-card panel">
         <h2 className="pause-card__title">暂停</h2>
-        <p className="pause-card__sub">喘口气，猫。</p>
+        <p className="pause-card__sub">先歇一会儿，委托还没结束。</p>
 
         <div className="pause-card__stats">
           <span className="chip">第 {snap.wave} 波</span>
           <span className="chip">Lv.{snap.level}</span>
-          <span className="chip">{snap.kills} 击杀</span>
+          <span className="chip">{snap.kills} 击退</span>
         </div>
 
         <button

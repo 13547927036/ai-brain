@@ -11,10 +11,10 @@ export const MAX_WEAPON_LEVEL = 5;
 export const WEAPONS = {
   hairball: {
     id: 'hairball',
-    name: '毛球弹',
+    name: '毛线团',
     kind: 'projectile',
     rarity: 1,
-    desc: '吐出一团毛球，直线飞向最近的敌人。',
+    desc: '把一团毛线抛向最近的怪物，缠住它。',
     levels: [
       { damage: 12, cooldown: 0.66, range: 260, speed: 440, count: 1, pierce: 0, spread: 0.1 },
       { damage: 16, cooldown: 0.62, range: 272, speed: 460, count: 1, pierce: 0, spread: 0.1 },
@@ -26,10 +26,10 @@ export const WEAPONS = {
 
   claw: {
     id: 'claw',
-    name: '磨爪',
+    name: '小木槌',
     kind: 'melee',
     rarity: 1,
-    desc: '贴身横挥一爪，扇形范围内的敌人全部挂彩。',
+    desc: '贴近后认真敲一下，扇形范围内的怪物都会被震退。',
     levels: [
       { damage: 22, cooldown: 0.62, range: 90, arc: 2.2, knockback: 70 },
       { damage: 28, cooldown: 0.58, range: 96, arc: 2.3, knockback: 80 },
@@ -41,10 +41,10 @@ export const WEAPONS = {
 
   hiss: {
     id: 'hiss',
-    name: '哈气',
+    name: '小喇叭',
     kind: 'cone',
     rarity: 2,
-    desc: '炸毛哈气，把面前的机器喷退并拖慢它们。',
+    desc: '鼓起腮帮吹一声，把面前的怪物吹退并拖慢。',
     levels: [
       { damage: 14, cooldown: 1.15, range: 134, arc: 1.9, knockback: 190, slow: 0.35, slowDur: 1.4 },
       { damage: 18, cooldown: 1.08, range: 144, arc: 2.0, knockback: 210, slow: 0.38, slowDur: 1.5 },
@@ -56,10 +56,10 @@ export const WEAPONS = {
 
   laser: {
     id: 'laser',
-    name: '激光笔',
+    name: '手电筒',
     kind: 'beam',
     rarity: 2,
-    desc: '红点扫过的地方就是一条直线伤害，穿透所有敌人。',
+    desc: '打开手电，笔直的光柱会照穿一排怪物。',
     levels: [
       { damage: 10, cooldown: 0.58, range: 360, width: 12, pierce: 99 },
       { damage: 13, cooldown: 0.54, range: 380, width: 14, pierce: 99 },
@@ -71,10 +71,10 @@ export const WEAPONS = {
 
   tail: {
     id: 'tail',
-    name: '尾巴旋风',
+    name: '风车',
     kind: 'orbit',
     rarity: 2,
-    desc: '尾巴甩成风车，绕着身子持续蹭伤靠近的敌人。',
+    desc: '小小的风车绕着身边转，碰到怪物就会割一下。',
     levels: [
       { damage: 10, cooldown: 0.3, range: 70, count: 1, spin: 2.5, tick: 0.32 },
       { damage: 13, cooldown: 0.3, range: 76, count: 1, spin: 2.8, tick: 0.3 },
@@ -86,10 +86,10 @@ export const WEAPONS = {
 
   trap: {
     id: 'trap',
-    name: '捕鼠夹',
+    name: '捕兽夹',
     kind: 'trap',
     rarity: 3,
-    desc: '在脚下丢一只夹子，敌人踩上去会被弹飞。',
+    desc: '在脚下放一个捕兽夹，怪物踩上去会被弹开。',
     levels: [
       { damage: 40, cooldown: 2.6, range: 0, blast: 58, max: 3, armTime: 0.25 },
       { damage: 52, cooldown: 2.4, range: 0, blast: 62, max: 3, armTime: 0.25 },

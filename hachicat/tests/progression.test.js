@@ -112,7 +112,7 @@ test('钱不够时不能购买', () => {
   assert.equal(res.reason, 'money');
 });
 
-test('治疗扣款并返回回血量，满血拒绝', () => {
+test('喝汤扣款并返回回血量，满血拒绝', () => {
   const w = createWorld({ characterId: 'hachiware', seed: 5 });
   const p = w.player;
   p.money = 500;

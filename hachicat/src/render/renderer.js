@@ -129,7 +129,7 @@ function updatePlayerAnim(t, p) {
     // 陷阱
     for (const trap of world.traps) {
       if (!inView(trap.x, trap.y)) continue;
-      drawSprite(ctx, 'trap.mouse', trap.x, trap.y, { theme, t, size: 30, armed: trap.arm <= 0 });
+      drawSprite(ctx, 'trap.snare', trap.x, trap.y, { theme, t, size: 30, armed: trap.arm <= 0 });
     }
 
     // 敌人（按 y 排序，产生前后遮挡）
@@ -199,7 +199,7 @@ function updatePlayerAnim(t, p) {
       for (const weapon of p.weapons) {
         if (!weapon.orbs) continue;
         for (const orb of weapon.orbs) {
-          drawSprite(ctx, 'proj.hairball', orb.x, orb.y, { theme, t, size: 16 });
+          drawSprite(ctx, 'proj.yarn', orb.x, orb.y, { theme, t, size: 16 });
           ctx.save();
           ctx.globalAlpha = 0.35;
           ctx.strokeStyle = theme.colors.accent;
@@ -263,7 +263,7 @@ function updatePlayerAnim(t, p) {
       c.arc(e.x, e.y, e.healRadius, 0, Math.PI * 2);
       c.stroke();
       c.restore();
-    } else if (e.ai === 'brood') {
+    } else if (e.ai === 'summoner') {
       c.save();
       c.globalAlpha = 0.22 + Math.sin(t * 3 + e.seedPhase) * 0.08;
       c.strokeStyle = theme.colors.danger;
@@ -307,7 +307,7 @@ function updatePlayerAnim(t, p) {
     }
   }
 
-  /** 攻击预警：突进线、自爆圈、首领冲刺 / 环形弹幕。 */
+  /** 攻击预警：突进线、自爆圈、讨伐目标冲刺 / 环形弹幕。 */
   function drawEnemyTelegraph(c, e, theme, t) {
     if (e.ai === 'dash' && e.warnT > 0) {
       const p = 1 - e.warnT / Math.max(0.001, e.warnMax);

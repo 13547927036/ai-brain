@@ -69,7 +69,7 @@ test('暂停期间时间不推进，恢复后继续', () => {
   assert.ok(g.waveTime > t);
 });
 
-test('第 12 波召唤首领，三个阶段随血量切换', () => {
+test('第 12 波召唤讨伐目标，三个阶段随血量切换', () => {
   const g = newGame(21);
   g.debugJumpWave(TOTAL_WAVES);
   assert.equal(g.waveIndex, 12);
@@ -87,7 +87,7 @@ test('第 12 波召唤首领，三个阶段随血量切换', () => {
   assert.equal(boss.phase, 3);
 });
 
-test('击败首领判定胜利并结算', () => {
+test('击退讨伐目标判定胜利并结算', () => {
   const g = newGame(31);
   g.debugJumpWave(TOTAL_WAVES);
   g.debugKillBoss();

@@ -17,12 +17,12 @@ export default function UpgradeModal({ controller, snap }) {
   if (!options.length) return null;
 
   return (
-    <div className="overlay overlay--center" role="dialog" aria-modal="true" aria-label="升级选择">
+    <div className="overlay overlay--center" role="dialog" aria-modal="true" aria-label="成长选择">
       <div className="upgrade-sheet">
         <div className="upgrade-sheet__head">
-          <p className="upgrade-sheet__eyebrow">LEVEL {snap.level}</p>
-          <h2 className="upgrade-sheet__title">升了一级</h2>
-          <p className="upgrade-sheet__sub">选一项，带着它继续跑。</p>
+          <p className="upgrade-sheet__eyebrow">成长 · LV.{snap.level}</p>
+          <h2 className="upgrade-sheet__title">又长大一点</h2>
+          <p className="upgrade-sheet__sub">选一项，带着它继续赶路。</p>
         </div>
 
         <div className="upgrade-list">
@@ -44,7 +44,7 @@ export default function UpgradeModal({ controller, snap }) {
                 <span className="upgrade-card__mods">{o.mods.join(' · ')}</span>
                 <span className="upgrade-card__flavor">
                   {o.flavor}
-                  {o.count > 0 ? ` · 已有 ${o.count} 层` : ''}
+                  {o.count > 0 ? ` · 已有 ${o.count} 次` : ''}
                 </span>
               </span>
             </button>

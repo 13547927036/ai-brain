@@ -14,11 +14,11 @@ export default function ShopScreen({ controller, snap }) {
   const stats = snap.stats || {};
 
   return (
-    <div className="overlay overlay--solid shop" role="dialog" aria-modal="true" aria-label="商店">
+    <div className="overlay overlay--solid shop" role="dialog" aria-modal="true" aria-label="补给点">
       <header className="shop__head">
         <div>
           <h2 className="shop__title">委托间隙</h2>
-          <p className="shop__sub">第 {snap.wave} 波清场 · 挑点东西再走</p>
+          <p className="shop__sub">第 {snap.wave} 波结束 · 在路边补给点歇口气</p>
         </div>
         <div className="shop__money">
           <Icon name="coin" size={15} />
@@ -54,15 +54,15 @@ export default function ShopScreen({ controller, snap }) {
                   <Icon name="coin" size={12} />
                   {o.price}
                 </span>
-                <span>{o.sold ? '已购' : o.reason || '购买'}</span>
+                <span>{o.sold ? '已买' : o.reason || '买下'}</span>
               </span>
-              {o.sold && <span className="offer__sold">已购</span>}
+              {o.sold && <span className="offer__sold">已买</span>}
             </button>
           ))}
         </div>
 
         <section className="shop__build">
-          <h3>当前装备 · {snap.weapons.length}/{MAX_WEAPONS} 槽</h3>
+          <h3>随身装备 · {snap.weapons.length}/{MAX_WEAPONS} 格</h3>
           <div className="shop__weapons">
             {snap.weapons.map((w, i) => (
               <span className="build-weapon" key={`${w.id}-${i}`}>
@@ -81,7 +81,7 @@ export default function ShopScreen({ controller, snap }) {
 
         {shop.synthesis?.length ? (
           <section className="shop__build">
-            <h3>武器合成 · 同等级两件合一件</h3>
+            <h3>装备整理 · 同等级两件合一件</h3>
             <div className="shop__weapons">
               {shop.synthesis.map((s) => (
                 <button
@@ -106,7 +106,7 @@ export default function ShopScreen({ controller, snap }) {
             disabled={!canHeal}
             onClick={() => controller.heal()}
           >
-            {hpFull ? '生命已满' : `治疗 ${shop.healPrice}`}
+            {hpFull ? '现在还不累' : `喝碗热汤 ${shop.healPrice}`}
           </button>
           <button
             className="btn btn--ghost btn--sm"
@@ -114,7 +114,7 @@ export default function ShopScreen({ controller, snap }) {
             onClick={() => controller.reroll()}
           >
             <Icon name="refresh" size={14} />
-            刷新 {shop.rerollCost}
+            换一批 {shop.rerollCost}
           </button>
         </div>
         <button
@@ -122,7 +122,7 @@ export default function ShopScreen({ controller, snap }) {
           data-testid="next-wave"
           onClick={() => controller.nextWave()}
         >
-          {isBossNext ? '挑战首领' : `下一波 · 第 ${snap.wave + 1} 波`}
+          {isBossNext ? '迎战讨伐目标' : `继续赶路 · 第 ${snap.wave + 1} 波`}
         </button>
       </footer>
     </div>

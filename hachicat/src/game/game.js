@@ -5,7 +5,7 @@ import { getCommission, commissionPayout, commissionRank } from '../content/comm
 import { ALL_ENEMIES, scaleEnemy } from '../content/enemies.js';
 import { getCharacter } from '../content/characters.js';
 import { STAT_META, formatMods, formatMod } from '../content/stats.js';
-import { WEAPON_ICONS } from '../content/assets.js';
+import { WEAPON_ICONS, ITEM_ICONS } from '../content/assets.js';
 import { getWeapon } from '../content/weapons.js';
 import { ITEM_BY_ID } from '../content/items.js';
 import { stepPlayerMovement } from './systems/movement.js';
@@ -443,7 +443,7 @@ export class Game {
         id: weapon.id,
         name: getWeapon(weapon.id)?.name || weapon.id,
         level: weapon.level,
-        icon: WEAPON_ICONS[weapon.id] || 'icon.paw',
+        icon: WEAPON_ICONS[weapon.id] || 'icon.heart',
       })),
       stats: { ...p.stats },
       boss: bossAlive
@@ -456,7 +456,7 @@ export class Game {
         rarity: u.rarity,
         flavor: u.flavor,
         mods: [formatMod({ stat: u.stat, amount: u.amount })],
-        icon: STAT_META[u.stat]?.icon || 'paw',
+        icon: STAT_META[u.stat]?.icon || 'heart',
         count: p.upgradeCounts[u.id] || 0,
       })),
       shop: this.shop
@@ -493,14 +493,14 @@ export class Game {
         price: offer.price,
         sold: offer.sold,
         desc: def?.desc || '',
-        icon: WEAPON_ICONS[offer.weaponId] || 'icon.paw',
+        icon: WEAPON_ICONS[offer.weaponId] || 'icon.heart',
         tag: copy
           ? `副本 Lv.${offer.level} · 可合成`
           : offer.level > 1
             ? `升级至 Lv.${offer.level}`
-            : '新武器',
+            : '新装备',
         canBuy: !offer.sold && p.money >= offer.price && !blocked,
-        reason: blocked ? '武器栏已满' : '',
+        reason: blocked ? '装备栏已满' : '',
       };
     }
     const item = ITEM_BY_ID[offer.itemId];
@@ -514,8 +514,8 @@ export class Game {
       sold: offer.sold,
       desc: item?.desc || '',
       mods: item ? formatMods(item.mods) : '',
-      icon: STAT_META[item?.mods?.[0]?.stat]?.icon || 'paw',
-      tag: '道具',
+      icon: ITEM_ICONS[item?.id] || 'icon.heart',
+      tag: '用品',
       canBuy: !offer.sold && p.money >= offer.price,
       reason: '',
     };

@@ -6,7 +6,7 @@
  * 所以这里只用 Image 与 onload / onerror 属性回调。
  *
  * 取不到图片时（微信小游戏没有 HTMLImageElement、或图片加载失败）返回 null，
- * 调用方会退回程序化绘制的猫，界面与战斗都不会空白。
+ * 调用方会退回程序化绘制的小动物，界面与战斗都不会空白。
  */
 const entries = new Map();
 const listeners = new Set();

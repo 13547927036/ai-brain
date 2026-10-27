@@ -4,7 +4,7 @@ import { addPickup } from './pickups.js';
 
 /**
  * 对敌人造成伤害：护甲减免 + 减伤 + 暴击飘字 + 击退 + 死亡结算。
- * opts.sourceKind: projectile | beam | melee | trap，用于「铁皮箱」的远程减伤。
+ * opts.sourceKind: projectile | beam | melee | trap，用于「铁甲虫」的远程减伤。
  */
 export function damageEnemy(world, enemy, amount, opts = {}) {
   if (enemy.dead) return 0;

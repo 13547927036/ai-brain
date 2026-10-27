@@ -17,7 +17,7 @@ export default function Hud({ snap, controller }) {
             <span className="hud__wave-total">/ {snap.totalWaves}</span>
           </div>
           <div className="hud__wave-name">
-            {snap.waveName} · {snap.bossWave ? '首领战' : `${timeLeft}s`}
+            {snap.waveName} · {snap.bossWave ? '讨伐目标' : `${timeLeft}s`}
           </div>
         </div>
 
@@ -57,7 +57,7 @@ export default function Hud({ snap, controller }) {
       {snap.boss && (
         <div className="hud__boss">
           <div className="hud__boss-top">
-            <span>首领 · {snap.boss.name}</span>
+            <span>讨伐目标 · {snap.boss.name}</span>
             <span>
               {snap.boss.hp} / {snap.boss.maxHp}
             </span>
