@@ -35,6 +35,18 @@ export const SPRITES = {
     variant: 'hachiware',
     image: './chars/hachiware.png',
     size: 44,
+    // 四方向逐帧素材（见 docs/character-4dir-animation-spec.md §6）。
+    // 目前只有向下的待机 4 帧 + 走路 6 帧；其他方向回退到 fallbackDir。
+    anim: {
+      base: './chars/anim',
+      prefix: 'hachiware',
+      cell: 256,
+      anchor: { x: 128, y: 224 },
+      dirs: ['down'],
+      fallbackDir: 'down',
+      frames: { idle: 4, walk: 6 },
+      fps: { idle: 6, walk: 10 },
+    },
     palette: { ...CHAR_PALETTE, body: '#fffdf8', bodyDark: '#d8d3e8', scarf: '#7fd8e8' },
   },
   'char.chiikawa': {
@@ -184,6 +196,17 @@ export function resolveSprite(id, themeId) {
   const override = base.themeOverrides && base.themeOverrides[themeId];
   if (!override) return base;
   return { ...base, palette: { ...base.palette, ...override } };
+}
+
+/**
+ * 逐帧图集地址：`<base>/<prefix>_<dir>_<state>.png`。
+ * 缺该方向的素材时退回 fallbackDir，避免因为没画好某个方向就整块不显示。
+ */
+export function animSheetUrl(anim, dir, state) {
+  if (!anim) return '';
+  const hasDir = anim.dirs && anim.dirs.includes(dir);
+  const useDir = hasDir ? dir : anim.fallbackDir || 'down';
+  return `${anim.base}/${anim.prefix}_${useDir}_${state}.png`;
 }
 
 /** 武器弹道 → 投射物 sprite（换画风时只改这里或 sprite 定义）。 */

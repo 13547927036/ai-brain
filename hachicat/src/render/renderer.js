@@ -1,5 +1,6 @@
 import { drawFloor, createProps } from './background.js';
 import { drawSprite } from './sprites.js';
+import { createAnimState, resetAnimState, stepAnimState } from './animation.js';
 
 /**
  * Canvas 渲染层：只负责把世界状态画出来。
@@ -20,12 +21,19 @@ export function createRenderer(canvas) {
  */
 const playAnim = { lastT: -1, phase: 0, move: 0, bob: 0, sway: 0, lean: 0, tilt: 0 };
 
+/**
+ * 逐帧动画状态（图集驱动）。和 playAnim 分离：
+ * 有图集时用这里的帧索引，没有图集时继续走上面的整体起伏。
+ */
+const playerAnim = createAnimState();
+
 function updatePlayerAnim(t, p) {
   let dt = 0;
   if (playAnim.lastT >= 0 && t >= playAnim.lastT) dt = Math.min(0.05, t - playAnim.lastT);
   if (t < playAnim.lastT) {
     playAnim.phase = 0;
     playAnim.move = 0;
+    resetAnimState(playerAnim);
   }
   playAnim.lastT = t;
 
@@ -45,6 +53,9 @@ function updatePlayerAnim(t, p) {
   playAnim.sway = Math.sin(ph * 0.5) * (0.004 + m * 0.012);
   playAnim.tilt = Math.sin(ph) * (0.004 + m * 0.03);
   playAnim.lean = ((p.moveX || 0) >= 0 ? 1 : -1) * m * 0.05;
+
+  // 帧索引状态：移动 → walk，松手满 130ms → idle；朝向来自 world.player.faceDir
+  stepAnimState(playerAnim, dt, !!p.moving, p.faceDir || 'down');
 }
   let props = [];
   let propsFor = '';
@@ -187,6 +198,7 @@ function updatePlayerAnim(t, p) {
           t,
           size: 46,
           facing: p.facing,
+          anim: playerAnim,
           bob: playAnim.bob,
           tilt: playAnim.tilt,
           sway: playAnim.sway,

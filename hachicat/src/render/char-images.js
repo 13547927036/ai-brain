@@ -61,3 +61,11 @@ export function getCharImage(url) {
 export function preloadCharImages(urls) {
   for (const url of urls) getCharImage(url);
 }
+
+/**
+ * 逐帧图集（一行动画帧）与单张立绘共用同一份按 URL 缓存的加载表，
+ * 只是调用处用这个名字表达"这是精灵图"，避免和静态立绘混用。
+ */
+export function getCharSheet(url) {
+  return getCharImage(url);
+}

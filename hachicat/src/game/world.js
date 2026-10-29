@@ -39,6 +39,8 @@ export function createWorld({ characterId = 'hachiware', seed = 1 } = {}) {
     flash: 0,
     aim: -Math.PI / 2,
     facing: 1,
+    // 四方向朝向，纯展示（决定用哪一套待机/走路图），不影响 facing 的战斗含义
+    faceDir: 'down',
     moveX: 0,
     moveY: 0,
     moving: false,

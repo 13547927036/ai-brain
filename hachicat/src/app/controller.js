@@ -3,7 +3,7 @@ import { THEMES, getTheme } from '../content/theme.js';
 import { createRenderer } from '../render/renderer.js';
 import { createJoystick } from '../input/joystick.js';
 import { STORAGE_KEYS } from '../platform/types.js';
-import { SPRITES } from '../content/assets.js';
+import { SPRITES, animSheetUrl } from '../content/assets.js';
 import { preloadCharImages } from '../render/char-images.js';
 
 /**
@@ -37,7 +37,16 @@ export class GameController {
     this.applyTheme();
 
     // 启动即预加载角色图片：第一次进战斗就能直接用图片，不会先闪一下兜底画面
-    preloadCharImages(Object.values(SPRITES).map((s) => s.image).filter(Boolean));
+    const urls = [];
+    for (const sprite of Object.values(SPRITES)) {
+      if (sprite.image) urls.push(sprite.image);
+      if (!sprite.anim) continue;
+      // 图集按「方向 × 动作」预加载；缺方向时会回退到 fallbackDir，不额外请求
+      for (const dir of sprite.anim.dirs) {
+        for (const state of ['idle', 'walk']) urls.push(animSheetUrl(sprite.anim, dir, state));
+      }
+    }
+    preloadCharImages(urls);
   }
 
   /* ---------------- 订阅（给 useSyncExternalStore 用） ---------------- */

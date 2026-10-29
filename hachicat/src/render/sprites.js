@@ -3,8 +3,9 @@
  * 这里只读 sprite 定义里的 palette，不读任何游戏数值。
  * 想换图片素材时，在 drawSprite 里加一个 `kind: 'image'` 分支即可。
  */
-import { resolveSprite } from '../content/assets.js';
-import { getCharImage } from './char-images.js';
+import { resolveSprite, animSheetUrl } from '../content/assets.js';
+import { getCharImage, getCharSheet } from './char-images.js';
+import { animFrame } from './animation.js';
 
 /* ---------------- 基础工具 ---------------- */
 
@@ -1516,7 +1517,53 @@ const IMAGE_CONTENT_W = 192;
 const IMAGE_SIZE_RATIO = 0.7;
 const IMAGE_FOOT_RATIO = 16 / 44;
 
+/**
+ * 图集单帧：与静态立绘共用同一条屏幕基线和内容宽度。
+ * scale 由 192 的内容宽度推出，所以每一格 256 都在同一比例下画，
+ * 脚底落在 anchor.y，水平中心落在 anchor.x，和渲染器画的投影对齐。
+ */
+function drawAnimFrame(ctx, x, y, size, cfg, img, anim) {
+  const scale = (size * IMAGE_SIZE_RATIO) / IMAGE_CONTENT_W;
+  const cell = cfg.cell * scale;
+  const frame = animFrame(anim.elapsed, cfg.fps[anim.state], cfg.frames[anim.state]);
+  const footY = y + size * IMAGE_FOOT_RATIO;
+
+  ctx.save();
+  ctx.imageSmoothingEnabled = true;
+  if ('imageSmoothingQuality' in ctx) ctx.imageSmoothingQuality = 'high';
+  ctx.drawImage(
+    img,
+    frame * cfg.cell, 0, cfg.cell, cfg.cell,
+    x - cfg.anchor.x * scale, footY - cfg.anchor.y * scale, cell, cell,
+  );
+  ctx.restore();
+}
+
+/** 受击闪白：图片角色与程序化小动物完全一致，保证打击反馈不变。 */
+function drawFlash(ctx, x, y, size, flash) {
+  if (!(flash > 0)) return;
+  ctx.save();
+  ctx.globalCompositeOperation = 'lighter';
+  ctx.globalAlpha = Math.min(0.8, flash * 4);
+  ctx.fillStyle = '#fff';
+  ellipse(ctx, x, y, size * 0.42, size * 0.42);
+  ctx.fill();
+  ctx.restore();
+}
+
 function drawCharImage(ctx, x, y, size, sprite, opts) {
+  // 1) 有图集且已加载 → 画当前帧（帧内已含呼吸/步态，不能再叠 bob/sway，否则双重运动）
+  const anim = opts.anim;
+  if (anim && sprite.anim) {
+    const sheet = getCharSheet(animSheetUrl(sprite.anim, anim.dir, anim.state));
+    if (sheet && sheet.ready) {
+      drawAnimFrame(ctx, x, y, size, sprite.anim, sheet.img, anim);
+      drawFlash(ctx, x, y, size, opts.flash);
+      return;
+    }
+  }
+
+  // 2) 图集缺失 → 现有静态立绘；3) 静态图也没有 → 程序化小动物
   const entry = getCharImage(sprite.image);
   // 图片尚未就绪或环境不支持（如微信小游戏）：退回程序化小动物，永远画得出东西
   if (!entry || !entry.ready) return drawCritter(ctx, x, y, size, sprite, opts);
@@ -1537,14 +1584,5 @@ function drawCharImage(ctx, x, y, size, sprite, opts) {
   ctx.drawImage(img, -w / 2, size * IMAGE_FOOT_RATIO - h, w, h);
   ctx.restore();
 
-  // 受击闪白与程序化小动物完全一致，保证打击反馈不变
-  if (opts.flash > 0) {
-    ctx.save();
-    ctx.globalCompositeOperation = 'lighter';
-    ctx.globalAlpha = Math.min(0.8, opts.flash * 4);
-    ctx.fillStyle = '#fff';
-    ellipse(ctx, x, y, size * 0.42, size * 0.42);
-    ctx.fill();
-    ctx.restore();
-  }
+  drawFlash(ctx, x, y, size, opts.flash);
 }

@@ -1,7 +1,8 @@
 # 哈奇猫：小八四方向动画素材规范与接入方案
 
-> 状态：**阶段 A，接入准备**。本文不包含真实逐帧素材，也不代表动画已经完成。
-> 当前线上版本继续使用 `public/chars/*.png` 静态立绘 + 整体起伏，游戏可正常游玩。
+> 状态：**阶段 B 进行中（仅向下）**。`public/chars/anim/` 已放入小八向下的待机 4 帧与走路 6 帧，
+> 战斗渲染已接入逐帧动画；其余三个方向尚未交付，运行时回退到向下图。
+> 静态 `public/chars/*.png` 保持不变，继续作为首页/选角图标与加载失败回退。
 
 ## 1. 环境与能力边界
 
@@ -329,21 +330,31 @@ motion blur, blurry edges, inconsistent proportions
 - [ ] 没有阴影；渲染器会单独画投影。
 - [ ] 在 32px 战斗尺寸和 101px 首页尺寸下检查清晰度。
 
-## 8. 代码接入方案（后续阶段）
-
-以下代码**本轮不修改**；等真实素材到位后再实施。
+## 8. 代码接入方案（已实施：仅向下）
 
 ### 8.1 数据层
 
-`src/content/assets.js` 的 `char.*` 增加第 6.3 节的 `anim` 配置。
+`src/content/assets.js` 的 `char.*` 增加第 6.3 节的 `anim` 配置，并提供 `animSheetUrl()`：
+
+```js
+anim: {
+  base: './chars/anim',
+  prefix: 'hachiware',
+  cell: 256,
+  anchor: { x: 128, y: 224 },
+  dirs: ['down'],        // 已交付的方向；缺方向时退回 fallbackDir
+  fallbackDir: 'down',
+  frames: { idle: 4, walk: 6 },
+  fps: { idle: 6, walk: 10 },
+}
+```
 
 ### 8.2 加载层
 
-`src/render/char-images.js`：
+`src/render/char-images.js`：新增 `getCharSheet(url)`（与静态立绘共用同一份 URL 缓存）。
 
-- 新增 `getCharSheet(url)`，按 URL 缓存 `Image`，沿用现有 `onload` / `onerror` 通知。
-- 新增预加载函数；`src/app/controller.js` 只在 `sprite.anim` 存在时加载 8 张图。
-- 单张失败只影响该方向/动作，回退静态正面图；不能整局黑屏。
+`src/app/controller.js`：启动时按 `sprite.anim.dirs × {idle, walk}` 预加载，缺方向不额外请求；
+单张失败只影响该方向/动作，回退静态正面图，不会整局黑屏。
 
 ### 8.3 绘制层
 
@@ -385,16 +396,32 @@ ctx.drawImage(img, sx, 0, 256, 256,
 
 ### 8.5 测试
 
-- 单元：方向判定（四方向、死区、斜向）、帧索引循环、图集缺失回退。
-- E2E：四方向移动、待机/走路切换、切换角色、暂停/结算、360×640、微信冒烟。
-- 视觉：四方向各截待机/走路帧，检查锚点、朝向和首尾循环。
-- 性能：8 张图按需加载，不每帧创建 Image/Canvas。
+- 单元 `tests/anim.test.js`：四方向判定（含斜向死区与静止保持）、待机/走路状态机
+  （130ms 停止延迟、切帧归零）、帧索引取模、图集地址回退、图集尺寸与 PNG-32、锚点常量。
+- `npm run test:e2e`：全流程 + 摇杆推动 + 帧率，84 项全过。
+- 视觉：战斗内截图确认待机与走路的脚底落在渲染器画好的投影上，头部不越界。
+
+### 8.6 本轮改动文件
+
+| 文件 | 改动 |
+| --- | --- |
+| `public/chars/anim/*.png` | 新增向下 idle（1024×256）/ walk（1536×256） |
+| `src/content/assets.js` | `char.hachiware.anim` 配置 + `animSheetUrl()` |
+| `src/render/animation.js` | 新增：状态机与帧索引（纯逻辑，可单测） |
+| `src/render/char-images.js` | 新增 `getCharSheet()` |
+| `src/render/sprites.js` | 图集单帧绘制分支 + 闪白抽成 `drawFlash()` |
+| `src/render/renderer.js` | `playerAnim` 状态推进 + 把 `anim` 传给 `drawSprite` |
+| `src/game/world.js` | 玩家新增 `faceDir: 'down'` |
+| `src/game/systems/movement.js` | `faceDirFor()`（0.15 死区），移动时更新朝向 |
+| `src/app/controller.js` | 启动预加载图集 |
+| `tests/anim.test.js` | 新增 11 个单元用例 |
 
 ## 9. 分阶段
 
-- **阶段 A（本轮）**：审计、名称核对、规范、外部生成说明。无真实素材，不接动画。
-- **阶段 B**：拿到小八 8 张真实 PNG 后，只接小八，保留其他角色静态表现；先修素材再调代码。
-- **阶段 C**：小八验收后，按同一配置接入吉伊卡哇、乌萨奇；每个角色独立生成，不套用小八帧。
+- **阶段 A（已完成）**：审计、名称核对、规范、外部生成说明。
+- **阶段 B（进行中，已完成 down）**：小八向下的 idle/walk 已交付并接入；
+  `up` / `left` / `right` 未交付，运行时回退到向下图，其他角色保持静态立绘。
+- **阶段 C**：小八四方向齐了以后，按同一配置接入吉伊卡哇、乌萨奇；每个角色独立生成，不套用小八帧。
 - **阶段 D**：完整回归；确认移动/攻击/碰撞/暂停/结算/微信构建。
 
 在真实 PNG 到位前，不用程序化形状、重复静态图或示意图切片冒充四方向动画。
